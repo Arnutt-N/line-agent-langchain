@@ -23,10 +23,12 @@
       <div id="chat-window" class="hidden bg-white dark:bg-gray-800 p-4 rounded shadow">
         <h2 id="chat-title" class="text-xl font-bold mb-4"></h2>
         <div id="chat-messages" class="h-96 overflow-y-auto mb-4"></div>
-        <form id="chat-form" class="flex">
-          <input id="chat-input" type="text" class="flex-1 p-2 border dark:bg-gray-700" placeholder="Type message...">
-          <button type="submit" class="p-2 bg-blue-500 text-white"><i data-lucide="send"></i></button>
-        </form>
+        <div class="chat-actions">
+          <form id="chat-form" class="flex">
+            <input id="chat-input" type="text" class="flex-1 p-2 border dark:bg-gray-700" placeholder="Type message...">
+            <button type="submit" class="p-2 bg-blue-500 text-white"><i data-lucide="send"></i></button>
+          </form>
+        </div>
       </div>
     </main>
     <!-- Settings -->

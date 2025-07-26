@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI, WebSocket, Depends, Request, HTTPException
+from fastapi import FastAPI, WebSocket, Depends, Request, HTTPException, Query
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from linebot import LineBotApi, WebhookHandler
@@ -7,6 +7,7 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, FollowEvent, UnfollowEvent
 from dotenv import load_dotenv
 import os
+import requests
 from contextlib import asynccontextmanager
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import START, StateGraph
@@ -72,6 +73,52 @@ def get_checkpointer():
 line_bot_api = LineBotApi(os.getenv('LINE_ACCESS_TOKEN'))
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET'))
 
+# LINE Loading Animation Functions
+def start_loading_animation(user_id: str, loading_seconds: int = 20):
+    """Start LINE loading animation (typing indicator)"""
+    try:
+        url = "https://api.line.me/v2/bot/chat/loading/start"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {os.getenv("LINE_ACCESS_TOKEN")}'
+        }
+        data = {
+            "chatId": user_id,
+            "loadingSeconds": loading_seconds
+        }
+        response = requests.post(url, headers=headers, json=data)
+        if response.status_code == 202:
+            print(f"Loading animation started for user {user_id}")
+            return True
+        else:
+            print(f"Failed to start loading animation: {response.status_code} - {response.text}")
+            return False
+    except Exception as e:
+        print(f"Error starting loading animation: {e}")
+        return False
+
+def stop_loading_animation(user_id: str):
+    """Stop LINE loading animation"""
+    try:
+        url = "https://api.line.me/v2/bot/chat/loading/stop"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {os.getenv("LINE_ACCESS_TOKEN")}'
+        }
+        data = {
+            "chatId": user_id
+        }
+        response = requests.post(url, headers=headers, json=data)
+        if response.status_code == 200:
+            print(f"Loading animation stopped for user {user_id}")
+            return True
+        else:
+            print(f"Failed to stop loading animation: {response.status_code} - {response.text}")
+            return False
+    except Exception as e:
+        print(f"Error stopping loading animation: {e}")
+        return False
+
 # LangChain LLM (Gemini)
 llm = ChatGoogleGenerativeAI(
     model=os.getenv("GEMINI_MODEL", "gemini-1.5-flash"), 
@@ -131,10 +178,18 @@ async def websocket_endpoint(websocket: WebSocket):
             if payload['type'] == 'send_message':
                 user_id = payload['user_id']
                 message = payload['message']
-                line_bot_api.push_message(user_id, TextSendMessage(text=message))
-                db = SessionLocal()
-                create_chat_message(db, user_id, message, is_from_user=False)
-                await manager.broadcast({"type": "message", "user_id": user_id, "text": message, "from": "admin"})
+                
+                # Start loading animation before sending admin message
+                start_loading_animation(user_id, 10)  # Show loading for up to 10 seconds
+                
+                try:
+                    line_bot_api.push_message(user_id, TextSendMessage(text=message))
+                    db = SessionLocal()
+                    create_chat_message(db, user_id, message, is_from_user=False)
+                    await manager.broadcast({"type": "message", "user_id": user_id, "text": message, "from": "admin"})
+                finally:
+                    # Stop loading animation after sending
+                    stop_loading_animation(user_id)
     except Exception as e:
         print(e)
         manager.disconnect(websocket)
@@ -177,11 +232,18 @@ def handle_follow(event):
     if user and user.blocked_at:
         renew_line_user(db, user_id)
         create_event_log(db, user_id, 'renew')
+        action = "renew"
     else:
         create_line_user(db, user_id, profile.display_name, profile.picture_url)
         create_event_log(db, user_id, 'add')
-    # Remove asyncio.create_task for now to avoid sync/async issues
-    # asyncio.create_task(manager.broadcast({"type": "user_update", "user_id": user_id, "action": "add/renew"}))
+        action = "add"
+    
+    # Broadcast user update
+    asyncio.create_task(manager.broadcast({
+        "type": "user_update", 
+        "user_id": user_id, 
+        "action": action
+    }))
 
 @handler.add(UnfollowEvent)
 def handle_unfollow(event):
@@ -189,8 +251,13 @@ def handle_unfollow(event):
     user_id = event.source.user_id
     block_line_user(db, user_id)
     create_event_log(db, user_id, 'block')
-    # Remove asyncio.create_task for now to avoid sync/async issues
-    # asyncio.create_task(manager.broadcast({"type": "user_update", "user_id": user_id, "action": "block"}))
+    
+    # Broadcast user update
+    asyncio.create_task(manager.broadcast({
+        "type": "user_update", 
+        "user_id": user_id, 
+        "action": "block"
+    }))
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
@@ -223,6 +290,9 @@ def handle_message(event):
     
     # Process message based on mode
     if user.mode == 'bot':
+        # Start loading animation before processing
+        start_loading_animation(user_id, 20)  # Show loading for up to 20 seconds
+        
         config = {"configurable": {"thread_id": user_id}}
         input_msg = {"messages": [HumanMessage(content=text)]}
         # Use agent_executor directly for now
@@ -232,22 +302,51 @@ def handle_message(event):
         except Exception as e:
             reply_text = f"Error: {str(e)}"
             print(f"Agent error for user {user_id}: {e}")
+        finally:
+            # Stop loading animation before replying
+            stop_loading_animation(user_id)
         
         line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
         create_chat_message(db, user_id, reply_text, is_from_user=False)
         
+        # Broadcast bot reply to admin panel
+        try:
+            asyncio.create_task(manager.broadcast({
+                "type": "message", 
+                "user_id": user_id, 
+                "text": reply_text, 
+                "from": "bot"
+            }))
+        except Exception as e:
+            print(f"Error broadcasting bot reply: {e}")
+        
         # Check for tool call (mode switch)
-        if "switch_to_manual_mode" in str(output).lower():  # Simple check; improve with output parsing
+        if "switch_to_manual_mode" in str(output).lower():
             update_line_user_mode(db, user_id, 'manual')
             send_telegram_notify(user_id)
-            # Remove asyncio.create_task for now to avoid sync/async issues
-            # asyncio.create_task(manager.broadcast({"type": "mode_switch", "user_id": user_id, "mode": "manual"}))
+            # Broadcast mode switch
+            try:
+                asyncio.create_task(manager.broadcast({
+                    "type": "mode_switch", 
+                    "user_id": user_id, 
+                    "mode": "manual"
+                }))
+            except Exception as e:
+                print(f"Error broadcasting mode switch: {e}")
     else:
         # Manual mode - don't auto-reply
         print(f"User {user_id} in manual mode, not replying automatically")
     
-    # Remove asyncio.create_task for now to avoid sync/async issues  
-    # asyncio.create_task(manager.broadcast({"type": "message", "user_id": user_id, "text": text, "from": "user"}))
+    # Broadcast user message to admin panel
+    try:
+        asyncio.create_task(manager.broadcast({
+            "type": "message", 
+            "user_id": user_id, 
+            "text": text, 
+            "from": "user"
+        }))
+    except Exception as e:
+        print(f"Error broadcasting user message: {e}")
 
 # Database dependency
 def get_db():
@@ -294,9 +393,22 @@ def get_messages(user_id: str, db: Session = Depends(get_db)):
     return get_chat_history(db, user_id)
 
 @app.post("/api/mode/{user_id}")
-def set_mode(user_id: str, mode: str, db: Session = Depends(get_db)):
+def set_mode(user_id: str, mode: str = Query(..., description="Mode to set: 'bot' or 'manual'"), db: Session = Depends(get_db)):
     user = update_line_user_mode(db, user_id, mode)
-    return {"status": "ok", "mode": user.mode}
+    if user:
+        # Broadcast mode change to connected clients
+        try:
+            asyncio.create_task(manager.broadcast({
+                "type": "mode_switch", 
+                "user_id": user_id, 
+                "mode": mode
+            }))
+        except Exception as e:
+            print(f"Error broadcasting mode change: {e}")
+        
+        return {"status": "ok", "mode": user.mode, "user_id": user_id}
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
 
 @app.get("/api/dashboard", response_model=DashboardStats)
 def dashboard(db: Session = Depends(get_db)):
@@ -304,6 +416,19 @@ def dashboard(db: Session = Depends(get_db)):
     response = JSONResponse(content=stats)
     response.headers["Access-Control-Allow-Origin"] = "*"
     return response
+
+# Loading Animation API Endpoints
+@app.post("/api/loading/start/{user_id}")
+def start_loading(user_id: str, loading_seconds: int = 20):
+    """Start loading animation for a specific user"""
+    success = start_loading_animation(user_id, loading_seconds)
+    return {"status": "success" if success else "error", "user_id": user_id, "loading_seconds": loading_seconds}
+
+@app.post("/api/loading/stop/{user_id}")
+def stop_loading(user_id: str):
+    """Stop loading animation for a specific user"""
+    success = stop_loading_animation(user_id)
+    return {"status": "success" if success else "error", "user_id": user_id}
 
 # Main execution block for direct python main.py execution
 if __name__ == "__main__":

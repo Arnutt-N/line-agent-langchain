@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LINE Agent Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>LINE Agent System Test</h1>
+    
+    <h2>Backend Status</h2>
+    <div id="backend-status">Checking...</div>
+    
+    <h2>API Endpoints</h2>
+    <div id="api-status"></div>
+    
+    <h2>WebSocket</h2>
+    <div id="ws-status">Not connected</div>
+    
+    <script>
+        // Test Backend
+        fetch('http://localhost:8000/health')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('backend-status').innerHTML = 
+                    `<div class="status success">✅ Backend is running! ${JSON.stringify(data)}</div>`;
+            })
+            .catch(err => {
+                document.getElementById('backend-status').innerHTML = 
+                    `<div class="status error">❌ Backend is not running: ${err.message}</div>`;
+            });
+            
+        // Test API Endpoints
+        const endpoints = ['/api/users', '/api/dashboard'];
+        endpoints.forEach(endpoint => {
+            fetch(`http://localhost:8000${endpoint}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('api-status').innerHTML += 
+                        `<div class="status success">✅ ${endpoint}: <pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                })
+                .catch(err => {
+                    document.getElementById('api-status').innerHTML += 
+                        `<div class="status error">❌ ${endpoint}: ${err.message}</div>`;
+                });
+        });
+        
+        // Test WebSocket
+        try {
+            const ws = new WebSocket('ws://localhost:8000/ws');
+            ws.onopen = () => {
+                document.getElementById('ws-status').innerHTML = 
+                    '<div class="status success">✅ WebSocket connected!</div>';
+            };
+            ws.onerror = (err) => {
+                document.getElementById('ws-status').innerHTML = 
+                    '<div class="status error">❌ WebSocket error</div>';
+            };
+        } catch (err) {
+            document.getElementById('ws-status').innerHTML = 
+                `<div class="status error">❌ WebSocket failed: ${err.message}</div>`;
+        }
+    </script>
+</body>
+</html>

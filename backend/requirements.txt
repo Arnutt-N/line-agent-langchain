@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+line-bot-sdk
+sqlalchemy
+psycopg[binary]
+python-dotenv
+requests
+pydantic
+langchain
+langchain-google-genai
+langgraph
+langgraph-checkpoint-postgres
+websockets

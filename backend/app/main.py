@@ -1,9 +1,9 @@
-import sys
-import os
-# Add backend directory to path for proper module imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import json
+import os
+import asyncio
+from datetime import datetime
+from typing import List, Optional
+
 from fastapi import FastAPI, WebSocket, Depends, Request, HTTPException, Query
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,33 +21,24 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.agents import create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.agents import AgentExecutor
-# Handle both direct execution and module imports
-try:
-    from .database import SessionLocal
-    from .models import LineUser, MessageCategory, MessageTemplate, TemplateUsageLog
-    from .crud import get_all_users, get_chat_history, update_line_user_mode, create_line_user, create_chat_message, create_event_log, renew_line_user, block_line_user, get_dashboard_stats
-    from .schemas import LineUserSchema, ChatMessageSchema, DashboardStats, MessageCategoryCreate, MessageCategoryUpdate, MessageCategorySchema, MessageTemplateCreate, MessageTemplateUpdate, MessageTemplateSchema, TemplateSelectionRequest
-    from .telegram import send_telegram_notify
-    from .tools import switch_to_manual_mode, query_conversation_history, summarize_conversation
-    from .hr_tools import search_hr_faq, search_hr_policies, check_leave_balance
-    from .template_crud import create_message_category, get_message_categories, get_message_category, update_message_category, delete_message_category, create_message_template, get_message_templates, get_message_template, update_message_template, delete_message_template
-    from .template_selector import TemplateSelector
-    from .message_builder import LineMessageBuilder
-except ImportError:
-    from app.database import SessionLocal
-    from app.models import LineUser, MessageCategory, MessageTemplate, TemplateUsageLog
-    from app.crud import get_all_users, get_chat_history, update_line_user_mode, create_line_user, create_chat_message, create_event_log, renew_line_user, block_line_user, get_dashboard_stats
-    from app.schemas import LineUserSchema, ChatMessageSchema, DashboardStats, MessageCategoryCreate, MessageCategoryUpdate, MessageCategorySchema, MessageTemplateCreate, MessageTemplateUpdate, MessageTemplateSchema, TemplateSelectionRequest
-    from app.telegram import send_telegram_notify
-    from app.tools import switch_to_manual_mode, query_conversation_history, summarize_conversation
-    from app.hr_tools import search_hr_faq, search_hr_policies, check_leave_balance
-    from app.template_crud import create_message_category, get_message_categories, get_message_category, update_message_category, delete_message_category, create_message_template, get_message_templates, get_message_template, update_message_template, delete_message_template
-    from app.template_selector import TemplateSelector
-    from app.message_builder import LineMessageBuilder
 from sqlalchemy.orm import Session
-from typing import List, Optional
-import asyncio
-from datetime import datetime
+
+# Local imports - use relative imports for package structure
+from .database import SessionLocal
+from .models import LineUser, MessageCategory, MessageTemplate, TemplateUsageLog
+from .crud import (get_all_users, get_chat_history, update_line_user_mode, create_line_user, 
+                   create_chat_message, create_event_log, renew_line_user, block_line_user, get_dashboard_stats)
+from .schemas import (LineUserSchema, ChatMessageSchema, DashboardStats, MessageCategoryCreate, 
+                      MessageCategoryUpdate, MessageCategorySchema, MessageTemplateCreate, 
+                      MessageTemplateUpdate, MessageTemplateSchema, TemplateSelectionRequest)
+from .telegram import send_telegram_notify
+from .tools import switch_to_manual_mode, query_conversation_history, summarize_conversation
+from .hr_tools import search_hr_faq, search_hr_policies, check_leave_balance
+from .template_crud import (create_message_category, get_message_categories, get_message_category, 
+                           update_message_category, delete_message_category, create_message_template, 
+                           get_message_templates, get_message_template, update_message_template, delete_message_template)
+from .template_selector import TemplateSelector
+from .message_builder import LineMessageBuilder
 
 load_dotenv()
 
@@ -115,9 +106,10 @@ def get_template_response(db: Session, user_id: str, user_message: str, context:
         return None, None
 
 # LINE Loading Animation Functions
-def start_loading_animation(user_id: str, loading_seconds: int = 20):
+def start_loading_animation(user_id: str, loading_seconds: int = 5):
     """Start LINE loading animation (typing indicator)"""
     try:
+        # Use LINE Messaging API show loading action
         url = "https://api.line.me/v2/bot/chat/loading/start"
         headers = {
             'Content-Type': 'application/json',
@@ -129,13 +121,22 @@ def start_loading_animation(user_id: str, loading_seconds: int = 20):
         }
         response = requests.post(url, headers=headers, json=data)
         if response.status_code == 202:
-            print(f"Loading animation started for user {user_id}")
+            print(f"Loading animation started for user {user_id} for {loading_seconds}s")
             return True
         else:
             print(f"Failed to start loading animation: {response.status_code} - {response.text}")
             return False
     except Exception as e:
         print(f"Error starting loading animation: {e}")
+        return False
+
+def show_typing_indicator(user_id: str):
+    """Show typing indicator using LINE Chat Loading API"""
+    try:
+        # Use the loading animation API which also shows typing indicator
+        return start_loading_animation(user_id, 2)  # Very short duration for typing effect
+    except Exception as e:
+        print(f"Error showing typing indicator: {e}")
         return False
 
 def stop_loading_animation(user_id: str):
@@ -279,17 +280,17 @@ async def websocket_endpoint(websocket: WebSocket):
                 user_id = payload['user_id']
                 message = payload['message']
                 
-                # Start loading animation before sending admin message
-                start_loading_animation(user_id, 10)  # Show loading for up to 10 seconds
+                # Show typing indicator before sending admin message
+                show_typing_indicator(user_id)
+                start_loading_animation(user_id, 3)  # Show loading for up to 3 seconds
                 
                 try:
                     line_bot_api.push_message(user_id, TextSendMessage(text=message))
                     db = SessionLocal()
                     create_chat_message(db, user_id, message, is_from_user=False)
                     await manager.broadcast({"type": "message", "user_id": user_id, "text": message, "from": "admin"})
-                finally:
-                    # Stop loading animation after sending
-                    stop_loading_animation(user_id)
+                except Exception as e:
+                    print(f"Error sending admin message: {e}")
     except Exception as e:
         print(e)
         manager.disconnect(websocket)
@@ -390,8 +391,11 @@ def handle_message(event):
     
     # Process message based on mode
     if user.mode == 'bot':
-        # Start loading animation before processing
-        start_loading_animation(user_id, 20)  # Show loading for up to 20 seconds
+        # Show typing indicator immediately
+        show_typing_indicator(user_id)
+        
+        # Also try loading animation
+        start_loading_animation(user_id, 5)  # Show loading for up to 5 seconds
         
         try:
             # First, try to get template-based response
@@ -416,9 +420,6 @@ def handle_message(event):
             reply_text = f"Error: {str(e)}"
             line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
             print(f"Error processing message for user {user_id}: {e}")
-        finally:
-            # Stop loading animation before replying
-            stop_loading_animation(user_id)
         
         create_chat_message(db, user_id, reply_text, is_from_user=False)
         

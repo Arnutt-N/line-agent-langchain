@@ -20,20 +20,26 @@ from langchain.agents import AgentExecutor
 # Handle both direct execution and module imports
 try:
     from .database import SessionLocal
-    from .models import LineUser
+    from .models import LineUser, MessageCategory, MessageTemplate, TemplateUsageLog
     from .crud import get_all_users, get_chat_history, update_line_user_mode, create_line_user, create_chat_message, create_event_log, renew_line_user, block_line_user, get_dashboard_stats
-    from .schemas import LineUserSchema, ChatMessageSchema, DashboardStats
+    from .schemas import LineUserSchema, ChatMessageSchema, DashboardStats, MessageCategoryCreate, MessageCategoryUpdate, MessageCategorySchema, MessageTemplateCreate, MessageTemplateUpdate, MessageTemplateSchema, TemplateSelectionRequest
     from .telegram import send_telegram_notify
     from .tools import switch_to_manual_mode, query_conversation_history, summarize_conversation
+    from .template_crud import create_message_category, get_message_categories, get_message_category, update_message_category, delete_message_category, create_message_template, get_message_templates, get_message_template, update_message_template, delete_message_template
+    from .template_selector import TemplateSelector
+    from .message_builder import LineMessageBuilder
 except ImportError:
     from database import SessionLocal
-    from models import LineUser
+    from models import LineUser, MessageCategory, MessageTemplate, TemplateUsageLog
     from crud import get_all_users, get_chat_history, update_line_user_mode, create_line_user, create_chat_message, create_event_log, renew_line_user, block_line_user, get_dashboard_stats
-    from schemas import LineUserSchema, ChatMessageSchema, DashboardStats
+    from schemas import LineUserSchema, ChatMessageSchema, DashboardStats, MessageCategoryCreate, MessageCategoryUpdate, MessageCategorySchema, MessageTemplateCreate, MessageTemplateUpdate, MessageTemplateSchema, TemplateSelectionRequest
     from telegram import send_telegram_notify
     from tools import switch_to_manual_mode, query_conversation_history, summarize_conversation
+    from template_crud import create_message_category, get_message_categories, get_message_category, update_message_category, delete_message_category, create_message_template, get_message_templates, get_message_template, update_message_template, delete_message_template
+    from template_selector import TemplateSelector
+    from message_builder import LineMessageBuilder
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 import asyncio
 from datetime import datetime
 
@@ -72,6 +78,35 @@ def get_checkpointer():
 
 line_bot_api = LineBotApi(os.getenv('LINE_ACCESS_TOKEN'))
 handler = WebhookHandler(os.getenv('LINE_CHANNEL_SECRET'))
+
+def get_template_response(db: Session, user_id: str, user_message: str, context: str = "general"):
+    """Get template-based response for the user"""
+    try:
+        # Try to select appropriate template
+        selector = TemplateSelector(db)
+        request = TemplateSelectionRequest(
+            context=context,
+            user_message=user_message,
+            category=None,
+            message_type=None,
+            tags=None
+        )
+        
+        template = selector.select_template(request)
+        
+        if template:
+            # Build LINE message from template
+            line_message = LineMessageBuilder.build_message(template.message_type, template.content)
+            
+            # Log template usage
+            selector.log_usage(template.id, user_id, context, True)
+            
+            return line_message, template
+        
+        return None, None
+    except Exception as e:
+        print(f"Error getting template response: {e}")
+        return None, None
 
 # LINE Loading Animation Functions
 def start_loading_animation(user_id: str, loading_seconds: int = 20):
@@ -293,20 +328,33 @@ def handle_message(event):
         # Start loading animation before processing
         start_loading_animation(user_id, 20)  # Show loading for up to 20 seconds
         
-        config = {"configurable": {"thread_id": user_id}}
-        input_msg = {"messages": [HumanMessage(content=text)]}
-        # Use agent_executor directly for now
         try:
-            output = agent_executor.invoke({"input": text, "chat_history": []})
-            reply_text = output.get("output", "No response")
+            # First, try to get template-based response
+            template_message, template = get_template_response(db, user_id, text, "conversation")
+            
+            if template_message and template:
+                # Use template response
+                line_bot_api.reply_message(event.reply_token, template_message)
+                reply_text = f"[Template: {template.name}] " + str(template.content.get('text', 'Template response'))
+                print(f"Used template '{template.name}' for user {user_id}")
+            else:
+                # Fallback to AI response
+                config = {"configurable": {"thread_id": user_id}}
+                input_msg = {"messages": [HumanMessage(content=text)]}
+                output = agent_executor.invoke({"input": text, "chat_history": []})
+                reply_text = output.get("output", "No response")
+                line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
+                print(f"Used AI response for user {user_id}")
+                
         except Exception as e:
+            # Final fallback to simple text
             reply_text = f"Error: {str(e)}"
-            print(f"Agent error for user {user_id}: {e}")
+            line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
+            print(f"Error processing message for user {user_id}: {e}")
         finally:
             # Stop loading animation before replying
             stop_loading_animation(user_id)
         
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(text=reply_text))
         create_chat_message(db, user_id, reply_text, is_from_user=False)
         
         # Broadcast bot reply to admin panel
@@ -321,7 +369,7 @@ def handle_message(event):
             print(f"Error broadcasting bot reply: {e}")
         
         # Check for tool call (mode switch)
-        if "switch_to_manual_mode" in str(output).lower():
+        if "switch_to_manual_mode" in reply_text.lower():
             update_line_user_mode(db, user_id, 'manual')
             send_telegram_notify(user_id)
             # Broadcast mode switch
@@ -429,6 +477,96 @@ def stop_loading(user_id: str):
     """Stop loading animation for a specific user"""
     success = stop_loading_animation(user_id)
     return {"status": "success" if success else "error", "user_id": user_id}
+
+# Message Templates API Endpoints
+
+# Categories
+@app.post("/api/categories", response_model=MessageCategorySchema)
+def create_category(category: MessageCategoryCreate, db: Session = Depends(get_db)):
+    return create_message_category(db, category)
+
+@app.get("/api/categories", response_model=List[MessageCategorySchema])
+def list_categories(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return get_message_categories(db, skip, limit)
+
+@app.get("/api/categories/{category_id}", response_model=MessageCategorySchema)
+def get_category(category_id: int, db: Session = Depends(get_db)):
+    category = get_message_category(db, category_id)
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return category
+
+@app.put("/api/categories/{category_id}", response_model=MessageCategorySchema)
+def update_category(category_id: int, category_update: MessageCategoryUpdate, db: Session = Depends(get_db)):
+    category = update_message_category(db, category_id, category_update)
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return category
+
+@app.delete("/api/categories/{category_id}")
+def delete_category(category_id: int, db: Session = Depends(get_db)):
+    category = delete_message_category(db, category_id)
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return {"message": "Category deleted successfully"}
+
+# Templates
+@app.post("/api/templates", response_model=MessageTemplateSchema)
+def create_template(template: MessageTemplateCreate, db: Session = Depends(get_db)):
+    return create_message_template(db, template)
+
+@app.get("/api/templates", response_model=List[MessageTemplateSchema])
+def list_templates(
+    skip: int = 0, 
+    limit: int = 100,
+    category_id: Optional[int] = None,
+    message_type: Optional[str] = None,
+    is_active: Optional[bool] = True,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    return get_message_templates(db, skip, limit, category_id, message_type, is_active, search)
+
+@app.get("/api/templates/{template_id}", response_model=MessageTemplateSchema)
+def get_template(template_id: int, db: Session = Depends(get_db)):
+    template = get_message_template(db, template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return template
+
+@app.put("/api/templates/{template_id}", response_model=MessageTemplateSchema)
+def update_template(template_id: int, template_update: MessageTemplateUpdate, db: Session = Depends(get_db)):
+    template = update_message_template(db, template_id, template_update)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return template
+
+@app.delete("/api/templates/{template_id}")
+def delete_template(template_id: int, db: Session = Depends(get_db)):
+    template = delete_message_template(db, template_id)
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return {"message": "Template deleted successfully"}
+
+# Template Selection for Bot
+@app.post("/api/templates/select")
+def select_template(request: TemplateSelectionRequest, db: Session = Depends(get_db)):
+    """Select appropriate template based on context"""
+    selector = TemplateSelector(db)
+    template = selector.select_template(request)
+    
+    if template:
+        return {
+            "template_id": template.id,
+            "template": template,
+            "message": "Template selected successfully"
+        }
+    else:
+        return {
+            "template_id": None,
+            "template": None,
+            "message": "No suitable template found"
+        }
 
 # Main execution block for direct python main.py execution
 if __name__ == "__main__":

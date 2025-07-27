@@ -176,3 +176,5 @@ pids
 .yarn-integrity
 
 .claude/
+
+keep/

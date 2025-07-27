@@ -129,6 +129,9 @@ desktop.ini
 secrets.json
 config.json
 credentials.json
+**/phase_*_complete.md
+**/phase_*_report.md
+projectLogMD/
 
 # Local development
 .local/

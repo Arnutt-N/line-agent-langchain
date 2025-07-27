@@ -13,8 +13,8 @@ timeout /t 2 /nobreak > nul
 
 :: Start Backend
 echo [2/4] Starting Backend Server...
-cd /d D:\genAI\line-agent-langchain\backend
-start "Backend - Port 8000" cmd /k "call ..\env\Scripts\activate && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+cd /d D:\genAI\line-agent-langchain
+start "Backend - Port 8000" cmd /k "call env\Scripts\activate && python -m uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000"
 
 :: Wait for backend
 echo [3/4] Waiting for backend to start...

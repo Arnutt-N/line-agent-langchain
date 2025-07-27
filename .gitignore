@@ -178,3 +178,6 @@ pids
 .claude/
 
 keep/
+
+secret/
+secret-key/

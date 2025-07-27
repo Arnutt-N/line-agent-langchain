@@ -1,8 +1,3 @@
-import sys
-import os
-# Add backend directory to path for proper module imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import json
 from fastapi import FastAPI, WebSocket, Depends, Request, HTTPException, Query
 from fastapi.responses import JSONResponse
@@ -11,6 +6,7 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, FollowEvent, UnfollowEvent
 from dotenv import load_dotenv
+import os
 import requests
 from contextlib import asynccontextmanager
 from langgraph.checkpoint.memory import MemorySaver
@@ -29,21 +25,21 @@ try:
     from .schemas import LineUserSchema, ChatMessageSchema, DashboardStats, MessageCategoryCreate, MessageCategoryUpdate, MessageCategorySchema, MessageTemplateCreate, MessageTemplateUpdate, MessageTemplateSchema, TemplateSelectionRequest
     from .telegram import send_telegram_notify
     from .tools import switch_to_manual_mode, query_conversation_history, summarize_conversation
-    from .hr_tools import search_hr_faq, search_hr_policies, check_leave_balance
+    from .hr_tools import search_hr_templates, get_leave_info, get_welfare_info, search_text_files, search_leave_balance
     from .template_crud import create_message_category, get_message_categories, get_message_category, update_message_category, delete_message_category, create_message_template, get_message_templates, get_message_template, update_message_template, delete_message_template
     from .template_selector import TemplateSelector
     from .message_builder import LineMessageBuilder
 except ImportError:
-    from app.database import SessionLocal
-    from app.models import LineUser, MessageCategory, MessageTemplate, TemplateUsageLog
-    from app.crud import get_all_users, get_chat_history, update_line_user_mode, create_line_user, create_chat_message, create_event_log, renew_line_user, block_line_user, get_dashboard_stats
-    from app.schemas import LineUserSchema, ChatMessageSchema, DashboardStats, MessageCategoryCreate, MessageCategoryUpdate, MessageCategorySchema, MessageTemplateCreate, MessageTemplateUpdate, MessageTemplateSchema, TemplateSelectionRequest
-    from app.telegram import send_telegram_notify
-    from app.tools import switch_to_manual_mode, query_conversation_history, summarize_conversation
-    from app.hr_tools import search_hr_faq, search_hr_policies, check_leave_balance
-    from app.template_crud import create_message_category, get_message_categories, get_message_category, update_message_category, delete_message_category, create_message_template, get_message_templates, get_message_template, update_message_template, delete_message_template
-    from app.template_selector import TemplateSelector
-    from app.message_builder import LineMessageBuilder
+    from database import SessionLocal
+    from models import LineUser, MessageCategory, MessageTemplate, TemplateUsageLog
+    from crud import get_all_users, get_chat_history, update_line_user_mode, create_line_user, create_chat_message, create_event_log, renew_line_user, block_line_user, get_dashboard_stats
+    from schemas import LineUserSchema, ChatMessageSchema, DashboardStats, MessageCategoryCreate, MessageCategoryUpdate, MessageCategorySchema, MessageTemplateCreate, MessageTemplateUpdate, MessageTemplateSchema, TemplateSelectionRequest
+    from telegram import send_telegram_notify
+    from tools import switch_to_manual_mode, query_conversation_history, summarize_conversation
+    from hr_tools import search_hr_templates, get_leave_info, get_welfare_info
+    from template_crud import create_message_category, get_message_categories, get_message_category, update_message_category, delete_message_category, create_message_template, get_message_templates, get_message_template, update_message_template, delete_message_template
+    from template_selector import TemplateSelector
+    from message_builder import LineMessageBuilder
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import asyncio
@@ -173,63 +169,39 @@ tools = [
     switch_to_manual_mode, 
     query_conversation_history, 
     summarize_conversation,
-    search_hr_faq,
-    search_hr_policies,
-    check_leave_balance
+    search_hr_templates,
+    get_leave_info,
+    get_welfare_info,
+    search_text_files,
+    search_leave_balance
 ]
 
 # Prompt
 HR_SYSTEM_PROMPT = """คุณคือผู้ช่วย HR อัจฉริยะของกองบริหารทรัพยากรบุคคล สำนักงานปลัดกระทรวงยุติธรรม
 
-## บทบาทและหน้าที่:
-1. ให้บริการข้อมูลด้าน HR แก่บุคลากรในสังกัดกระทรวงยุติธรรม
-2. ตอบคำถามเกี่ยวกับการลา สวัสดิการ เงินเดือน ระเบียบ และข้อมูล HR ทั่วไป
-3. ช่วยค้นหาข้อมูลจากระเบียบ กฎหมาย คำสั่ง และประกาศที่เกี่ยวข้อง
-4. แนะนำขั้นตอนการปฏิบัติงานด้าน HR
+บทบาทหน้าที่:
+1. ให้คำแนะนำเกี่ยวกับสิทธิ สวัสดิการ และระเบียบการบริหารงานบุคคล
+2. ช่วยค้นหาข้อมูลจากระเบียบ กฎหมาย คำสั่ง ประกาศที่เกี่ยวข้อง
+3. แนะนำขั้นตอนการปฏิบัติงานด้าน HR
+4. ตอบคำถามด้วยความถูกต้อง เป็นทางการ และอ้างอิงแหล่งที่มา
 
-## แหล่งข้อมูลที่มี:
-1. **Templates (เร็วที่สุด)** - ข้อความสำเร็จรูป 20+ แบบ ครอบคลุมคำถามที่พบบ่อย
-2. **ไฟล์ข้อมูล HR** - FAQ, นโยบาย, สวัสดิการ ในโฟลเดอร์ data/text/
-3. **ความรู้พื้นฐาน** - ข้อมูลทั่วไปเกี่ยวกับระบบราชการไทย
+แหล่งข้อมูลที่มี:
+1. Message Templates - ข้อความสำเร็จรูปสำหรับคำถามที่พบบ่อย
+2. Text Files - FAQ, นโยบาย (policies), สวัสดิการ (benefits)
+3. CSV Files - ข้อมูลวันลาคงเหลือของพนักงาน
 
-## หลักการตอบคำถาม:
-1. **เลือกแหล่งข้อมูลอัจฉริยะ**:
-   - Templates: สำหรับคำถามทั่วไป ทักทาย ข้อมูลพื้นฐาน
-   - ไฟล์ข้อมูล: สำหรับรายละเอียดเพิ่มเติม คำถามเฉพาะ
-   - ความรู้ทั่วไป: สำหรับข้อมูลที่ไม่มีในระบบ
+กลยุทธ์การค้นหา:
+- คำถามทั่วไป/ทักทาย → ใช้ search_hr_templates
+- คำถามเกี่ยวกับการลา → ใช้ get_leave_info หรือ search_text_files
+- คำถามเกี่ยวกับสวัสดิการ → ใช้ get_welfare_info หรือ search_text_files
+- ตรวจสอบวันลาคงเหลือ → ใช้ search_leave_balance (ต้องมีรหัสพนักงาน)
+- คำถามอื่นๆ → ใช้ search_text_files
 
-2. **รูปแบบการตอบ**:
-   - ใช้ภาษาราชการที่สุภาพ เป็นทางการ
-   - ตอบตรงประเด็น กระชับ ชัดเจน
-   - ใช้ emoji เพื่อให้อ่านง่าย (📋 📌 ✅ 💡)
-   - แบ่งหัวข้อชัดเจนด้วย bullet points
-   - อ้างอิงระเบียบ/กฎหมายเมื่อตอบเรื่องสิทธิ
-
-3. **ข้อมูลที่ให้บริการ**:
-   - การลา: ลาป่วย ลาพักผ่อน ลากิจ ลาคลอด ลาอุปสมบท
-   - สวัสดิการ: ค่ารักษาพยาบาล ค่าเล่าเรียนบุตร เงินกู้ ประกันกลุ่ม
-   - เงินเดือน: การเลื่อนเงินเดือน ค่าตอบแทน
-   - ระเบียบ: เวลาราชการ การแต่งกาย วันหยุด
-   - ทั่วไป: ติดต่อ HR ดาวน์โหลดแบบฟอร์ม วิธีเช็ควันลา
-
-## ตัวอย่างการตอบ:
-คำถาม: "ขอทราบสิทธิการลาป่วย"
-คำตอบ: "📋 สิทธิการลาป่วย:
-• ลาได้เท่าที่ป่วยจริง (ไม่เกิน 60 วันทำการ/ปี)
-• เกิน 30 วัน ต้องมีใบรับรองแพทย์
-• ได้รับเงินเดือนระหว่างลา
-📌 อ้างอิง: ระเบียบการลาของข้าราชการ พ.ศ. 2555"
-
-## ข้อจำกัดและคำแนะนำ:
-- หากไม่แน่ใจในคำตอบ ให้แนะนำติดต่อ HR โดยตรง
-- ไม่ให้คำปรึกษาเรื่องส่วนตัวหรือกรณีพิเศษ
-- ไม่เปิดเผยข้อมูลส่วนบุคคลของเจ้าหน้าที่
-- เมื่อถูกถามนอกเหนือจาก HR ให้บอกว่าเป็นผู้ช่วย HR โดยเฉพาะ
-
-## Special Commands:
-- "เช็ควันลา [รหัสพนักงาน]" - ดูวันลาคงเหลือ
-- "ดาวน์โหลดแบบฟอร์ม" - แสดงลิงก์แบบฟอร์ม
-- "ติดต่อ HR" - แสดงช่องทางติดต่อ"""
+หลักการตอบคำถาม:
+- ใช้ภาษาราชการที่สุภาพและเป็นทางการ
+- อ้างอิงระเบียบ/กฎหมายที่เกี่ยวข้องทุกครั้ง
+- ให้ข้อมูลที่ถูกต้องและเป็นปัจจุบัน
+- หากไม่แน่ใจ ให้แนะนำติดต่อเจ้าหน้าที่ HR โดยตรง"""
 
 prompt = ChatPromptTemplate.from_messages([
     ("system", HR_SYSTEM_PROMPT),

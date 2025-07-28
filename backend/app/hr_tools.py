@@ -9,7 +9,7 @@ import json
 def search_hr_faq(query: str) -> str:
     """ค้นหาคำตอบจากไฟล์ FAQ HR"""
     try:
-        faq_file = os.path.join("data", "text", "faq_hr.txt")
+        faq_file = os.path.join("data", "text","faq.txt", "faq_hr.txt")
         if not os.path.exists(faq_file):
             return "ไม่พบไฟล์ FAQ"
         
@@ -41,7 +41,7 @@ def search_hr_faq(query: str) -> str:
 def search_hr_policies(query: str) -> str:
     """ค้นหานโยบาย HR ที่เกี่ยวข้อง"""
     try:
-        policy_file = os.path.join("data", "text", "policies_hr.txt")
+        policy_file = os.path.join("data", "text","policies.txt", "policies_hr.txt")
         if not os.path.exists(policy_file):
             return "ไม่พบไฟล์นโยบาย"
         

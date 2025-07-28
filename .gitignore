@@ -132,6 +132,12 @@ credentials.json
 **/phase_*_complete.md
 **/phase_*_report.md
 projectLogMD/
+*SECURITY_INCIDENT_REPORT*.md
+**/SECURITY*.md
+.secrets.baseline
+
+# Pre-commit
+.pre-commit-config.yaml
 
 # Local development
 .local/

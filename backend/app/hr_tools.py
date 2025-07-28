@@ -9,7 +9,7 @@ import json
 def search_hr_faq(query: str) -> str:
     """ค้นหาคำตอบจากไฟล์ FAQ HR"""
     try:
-        faq_file = os.path.join("data", "text","faq.txt", "faq_hr.txt")
+        faq_file = os.path.join("data", "text", "faq.txt")
         if not os.path.exists(faq_file):
             return "ไม่พบไฟล์ FAQ"
         
@@ -41,7 +41,7 @@ def search_hr_faq(query: str) -> str:
 def search_hr_policies(query: str) -> str:
     """ค้นหานโยบาย HR ที่เกี่ยวข้อง"""
     try:
-        policy_file = os.path.join("data", "text","policies.txt", "policies_hr.txt")
+        policy_file = os.path.join("data", "text", "policies.txt")
         if not os.path.exists(policy_file):
             return "ไม่พบไฟล์นโยบาย"
         
@@ -61,6 +61,38 @@ def search_hr_policies(query: str) -> str:
             
     except Exception as e:
         return f"เกิดข้อผิดพลาดในการค้นหา: {str(e)}"
+
+@tool
+def search_culture_org(query: str) -> str:
+    """ค้นหาข้อมูลวัฒนธรรมและค่านิยมองค์กรกระทรวงยุติธรรม"""
+    try:
+        culture_file = os.path.join("data", "text", "culture_org.txt")
+        if not os.path.exists(culture_file):
+            return "ไม่พบไฟล์วัฒนธรรมองค์กร"
+        
+        with open(culture_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # ค้นหาข้อมูลที่เกี่ยวข้อง
+        lines = content.split('\n')
+        relevant_lines = []
+        
+        for i, line in enumerate(lines):
+            if query.lower() in line.lower():
+                # เอาบริบท 3 บรรทัดก่อนและหลัง
+                start = max(0, i-3)
+                end = min(len(lines), i+4)
+                context = lines[start:end]
+                relevant_lines.extend(context)
+                relevant_lines.append("---")
+        
+        if relevant_lines:
+            return "\n".join(relevant_lines[:30])  # จำกัดไม่เกิน 30 บรรทัด
+        else:
+            return "ไม่พบข้อมูลวัฒนธรรมองค์กรที่เกี่ยวข้องกับคำค้นหา"
+            
+    except Exception as e:
+        return f"เกิดข้อผิดพลาดในการค้นหาวัฒนธรรมองค์กร: {str(e)}"
 
 @tool
 def check_leave_balance(employee_id: str) -> str:

@@ -1,25 +1,25 @@
 """
-Vercel serverless function entry point for the LINE Bot backend.
-This file serves as the handler for all API requests in Vercel's serverless environment.
+Simplified LINE Bot webhook for Vercel
 """
-
-import sys
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+import json
 import os
-from pathlib import Path
 
-# Add the backend directory to Python path
-backend_dir = Path(__file__).parent.parent / "backend"
-sys.path.insert(0, str(backend_dir))
+app = FastAPI()
 
-# Import the FastAPI app
-from backend.app.main import app
+@app.get("/")
+def read_root():
+    return {"message": "LINE Bot API is running on Vercel!"}
 
-# Vercel expects a handler function
-def handler(request, response):
-    """
-    Vercel serverless function handler
-    """
-    return app(request, response)
-
-# For compatibility with different Vercel Python runtimes
-application = app
+@app.post("/")
+async def webhook(request: Request):
+    """Handle LINE webhook"""
+    try:
+        body = await request.body()
+        return {"status": "ok", "message": "Webhook received"}
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )

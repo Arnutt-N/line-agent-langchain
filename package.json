@@ -1,0 +1,13 @@
+{
+  "name": "line-bot-hr-assistant",
+  "version": "1.0.0",
+  "description": "AI-powered HR assistant LINE Bot with multi-source RAG",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "dev": "cd frontend && npm run dev",
+    "preview": "cd frontend && npm run preview"
+  },
+  "keywords": ["line-bot", "ai", "hr", "assistant", "fastapi", "langchain"],
+  "author": "Ministry of Justice Thailand",
+  "license": "MIT"
+}

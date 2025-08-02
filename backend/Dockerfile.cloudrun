@@ -1,21 +1,22 @@
-# Multi-stage Docker build for Google Cloud Run
-FROM python:3.11-slim as backend
+# Production Dockerfile for Google Cloud Run
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    curl \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install Python dependencies
-COPY requirements-simplified.txt requirements.txt
+COPY requirements-minimal-no-version.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements-minimal-no-version.txt
 
 # Copy application code
-COPY . .
+COPY app/ ./app/
 
 # Create necessary directories
 RUN mkdir -p data/csv data/documents data/excel data/text
@@ -25,8 +26,17 @@ ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8080
 
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+
 # Expose the port that Cloud Run expects
 EXPOSE 8080
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
 # Command to run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
+CMD ["uvicorn", "app.main_simple:app", "--host", "0.0.0.0", "--port", "8080", "--log-level", "info"]

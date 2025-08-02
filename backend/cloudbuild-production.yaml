@@ -1,0 +1,15 @@
+steps:
+  # Build the container image using Dockerfile.production
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/line-hr-bot-backend:latest', '-f', 'Dockerfile', '.']
+  
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/line-hr-bot-backend:latest']
+
+# Store images in Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/line-hr-bot-backend:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

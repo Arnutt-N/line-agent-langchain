@@ -23,10 +23,6 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 class DatabaseManager:
     def __init__(self):
         self.supabase: Optional[Client] = None
@@ -43,6 +39,7 @@ class DatabaseManager:
             return
         
         try:
+            # Create client without proxy parameter
             self.supabase = create_client(supabase_url, supabase_service_key)
             logger.info("✅ Supabase connection established successfully")
             
@@ -52,12 +49,22 @@ class DatabaseManager:
             
         except Exception as e:
             logger.error(f"❌ Failed to connect to Supabase: {e}")
-            self.supabase = None
+            # If it's a proxy error, try to create client differently
+            if "proxy" in str(e):
+                try:
+                    # Alternative approach without any extra parameters
+                    import supabase
+                    self.supabase = supabase.Client(supabase_url, supabase_service_key)
+                    logger.info("✅ Supabase connection established with alternative method")
+                except:
+                    self.supabase = None
+            else:
+                self.supabase = None
     
     def get_client(self) -> Optional[Client]:
         """Get Supabase client"""
         if not self.supabase:
-            logger.warning("⚠️ Supabase client not available")
+            logger.warning("⚠️ Supabase client not available, attempting reconnection...")
             self._initialize_supabase()
         return self.supabase
     

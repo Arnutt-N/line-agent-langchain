@@ -1,0 +1,42 @@
+# Production-ready requirements with compatible versions
+# Core Web Framework
+fastapi>=0.104.0,<0.115.0
+uvicorn[standard]>=0.24.0,<0.30.0
+
+# Database & Storage
+supabase>=2.3.0,<3.0.0
+sqlalchemy>=2.0.20,<2.1.0
+
+# LINE Bot SDK
+line-bot-sdk>=3.5.0,<4.0.0
+
+# AI & Language Models - Compatible versions
+google-generativeai>=0.4.1,<0.5.0
+langchain>=0.2.0,<0.3.0
+langchain-google-genai>=0.1.0,<0.2.0
+langchain-core>=0.2.0,<0.3.0
+langsmith>=0.1.17,<0.2.0
+
+# LangGraph with compatible core
+langgraph>=0.0.62,<0.1.0
+langgraph-checkpoint-postgres>=1.0.0,<2.0.0
+
+# Core Dependencies
+pydantic>=2.5.0,<3.0.0
+python-dotenv>=1.0.0,<2.0.0
+python-multipart>=0.0.6,<0.1.0
+
+# HTTP & Networking
+httpx>=0.24.0,<0.27.0
+requests>=2.31.0,<3.0.0
+
+# Async & WebSocket
+websockets>=12.0,<13.0
+aiofiles>=23.2.0,<24.0.0
+
+# Production Server
+gunicorn>=21.2.0,<22.0.0
+
+# System Dependencies
+packaging>=23.2,<25.0
+typing-extensions>=4.8.0,<5.0.0

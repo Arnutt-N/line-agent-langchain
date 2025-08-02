@@ -1,0 +1,11 @@
+# Ultra minimal - only essentials
+fastapi
+uvicorn[standard]
+python-dotenv
+gunicorn
+sqlalchemy
+supabase
+line-bot-sdk
+google-generativeai
+requests
+aiofiles

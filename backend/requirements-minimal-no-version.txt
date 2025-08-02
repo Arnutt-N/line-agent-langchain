@@ -1,0 +1,27 @@
+# Minimal requirements without version constraints
+# Let pip resolve dependencies
+
+# Core
+fastapi
+uvicorn[standard]
+python-dotenv
+gunicorn
+
+# Database
+sqlalchemy
+supabase
+
+# LINE Bot
+line-bot-sdk
+
+# AI - Core packages only
+google-generativeai
+langchain
+langchain-google-genai
+langgraph
+
+# Essential dependencies
+pydantic
+requests
+aiofiles
+httpx

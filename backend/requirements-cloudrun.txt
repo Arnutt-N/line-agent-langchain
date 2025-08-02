@@ -1,0 +1,25 @@
+# Simplified requirements for Cloud Run deployment
+# Core Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Database
+sqlalchemy==2.0.42
+python-dotenv==1.0.1
+supabase==2.11.0
+
+# LINE Bot
+line-bot-sdk==3.17.1
+
+# Google AI (Simple version without Langchain)
+google-generativeai==0.8.3
+
+# Basic dependencies
+pydantic==2.11.7
+requests==2.32.4
+aiofiles==23.2.1
+gunicorn==21.2.0
+httpx>=0.26,<0.29
+python-multipart==0.0.6
+
+# Remove Langchain dependencies for now - will add later if needed

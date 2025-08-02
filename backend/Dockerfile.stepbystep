@@ -1,0 +1,68 @@
+# Production Dockerfile for Google Cloud Run with step-by-step installation
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies in steps to avoid conflicts
+RUN pip install --no-cache-dir --upgrade pip
+
+# Core dependencies first
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn[standard] \
+    python-dotenv \
+    gunicorn \
+    pydantic \
+    requests \
+    aiofiles \
+    httpx
+
+# Database
+RUN pip install --no-cache-dir \
+    sqlalchemy \
+    supabase
+
+# LINE Bot
+RUN pip install --no-cache-dir line-bot-sdk
+
+# Google AI (install in order)
+RUN pip install --no-cache-dir google-generativeai
+
+# Langchain (install core first)
+RUN pip install --no-cache-dir langchain-core
+RUN pip install --no-cache-dir langchain
+RUN pip install --no-cache-dir langchain-google-genai
+RUN pip install --no-cache-dir langgraph
+
+# Copy application code
+COPY app/ ./app/
+
+# Create necessary directories
+RUN mkdir -p data/csv data/documents data/excel data/text
+
+# Set environment variables for production
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+
+# Create non-root user for security
+RUN useradd --create-home --shell /bin/bash appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+
+# Expose the port that Cloud Run expects
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Command to run the application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--log-level", "info"]

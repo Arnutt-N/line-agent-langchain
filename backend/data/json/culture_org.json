@@ -90,6 +90,11 @@
     },
     "organizational_culture": {
         "title": "วัฒนธรรมองค์กร กระทรวงยุติธรรม",
+        "keywords": [
+            "วัฒนธรรมองค์กร",
+            "วฒน",
+            "วัฒนธรรม"
+        ],
         "concept": "JUSTICE",
         "concept_meaning": "ความยุติธรรม",
         "pronunciation": "จัสติส",

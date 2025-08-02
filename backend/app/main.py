@@ -44,7 +44,8 @@ try:
                           MessageTemplateUpdate, MessageTemplateSchema, TemplateSelectionRequest)
     from .telegram import send_telegram_notify
     from .tools import switch_to_manual_mode, query_conversation_history, summarize_conversation
-    from .hr_tools import search_hr_faq, search_hr_policies, check_leave_balance, search_culture_org
+    from .hr_tools import (search_hr_faq, search_hr_policies, check_leave_balance, search_culture_org,
+                           search_hr_faq_json, search_culture_values_json, search_all_hr_data)
     from .template_crud import (create_message_category, get_message_categories, get_message_category, 
                                update_message_category, delete_message_category, create_message_template, 
                                get_message_templates, get_message_template, update_message_template, delete_message_template)
@@ -515,9 +516,12 @@ if GEMINI_AVAILABLE and LOCAL_IMPORTS_AVAILABLE:
             switch_to_manual_mode, 
             query_conversation_history, 
             summarize_conversation,
-            search_hr_faq,
+            search_all_hr_data,        # ฟังก์ชันหลักค้นหาจากทุกแหล่ง
+            search_hr_faq_json,        # ค้นหาจาก FAQ JSON
+            search_culture_values_json, # ค้นหาจากวัฒนธรรมองค์กร JSON
+            search_hr_faq,             # Legacy function
             search_hr_policies,
-            search_culture_org,
+            search_culture_org,        # Legacy function
             check_leave_balance
         ]
         
@@ -547,15 +551,21 @@ if GEMINI_AVAILABLE and LOCAL_IMPORTS_AVAILABLE:
 
 ## แหล่งข้อมูลที่มี:
 1. **Templates (เร็วที่สุด)** - ข้อความสำเร็จรูป 20+ แบบ ครอบคลุมคำถามที่พบบ่อย
-2. **ไฟล์ข้อมูล HR** - FAQ, นโยบาย, สวัสดิการ, วัฒนธรรมองค์กร ในโฟลเดอร์ data/text/
-3. **วัฒนธรรมและค่านิยมองค์กร** - ค่านิยม "สุจริต จิตบริการ ยึดมั่นความยุติธรรม" และวัฒนธรรม JUSTICE
+2. **ไฟล์ JSON (แนะนำ)** - ข้อมูล FAQ และวัฒนธรรมองค์กรในรูปแบบ JSON ที่ค้นหาได้แม่นยำ
+   - search_all_hr_data() - ค้นหาจากทุกแหล่งข้อมูล JSON (ใช้ฟังก์ชันนี้เป็นหลัก)
+   - search_hr_faq_json() - ค้นหาจาก FAQ JSON โดยเฉพาะ
+   - search_culture_values_json() - ค้นหาจากวัฒนธรรมและค่านิยมองค์กร JSON
+3. **ไฟล์ข้อมูล HR (Legacy)** - FAQ, นโยบาย, สวัสดิการ ในโฟลเดอร์ data/text/
+4. **วัฒนธรรมและค่านิยมองค์กร** - ค่านิยม "สุจริต จิตบริการ ยึดมั่นความยุติธรรม" และวัฒนธรรม JUSTICE
 4. **ความรู้พื้นฐาน** - ข้อมูลทั่วไปเกี่ยวกับระบบราชการไทย ข้าราชการพลเรือน ลูกจ้างประจำ พนักงานราชการ ลูกจ้างชั่วคราว พนักงานกองทุนยุติธรรม พนักงานจ้างเหมาบริการ
 
 ## หลักการตอบคำถาม:
 1. **เลือกแหล่งข้อมูลอัจฉริยะ**:
    - Templates: สำหรับคำถามทั่วไป ทักทาย ข้อมูลพื้นฐาน
-   - ไฟล์ข้อมูล: สำหรับรายละเอียดเพิ่มเติม คำถามเฉพาะ (FAQ, นโยบาย, วัฒนธรรมองค์กร)
-   - วัฒนธรรมองค์กร: สำหรับคำถามเกี่ยวกับค่านิยม วัฒนธรรม JUSTICE จิตบริการ โดยใช้ข้อมูลจริง ห้ามย่อ ห้ามลดทอน หรือเปลี่ยนแปลงเนื้อหา
+   - search_all_hr_data(): ใช้เป็นหลักสำหรับคำถามเกี่ยวกับ HR (ครอบคลุม FAQ และวัฒนธรรมองค์กร)
+   - search_hr_faq_json(): สำหรับคำถาม FAQ เฉพาะ
+   - search_culture_values_json(): สำหรับคำถามเกี่ยวกับค่านิยม วัฒนธรรม JUSTICE
+   - Legacy functions: เฉพาะกรณีจำเป็น
    - ความรู้ทั่วไป: สำหรับข้อมูลที่ไม่มีในระบบ
 
 2. **รูปแบบการตอบ**:
@@ -582,7 +592,7 @@ if GEMINI_AVAILABLE and LOCAL_IMPORTS_AVAILABLE:
     - เปิดเผยข้อมูลส่วนตัวของผู้อื่น
     - ใช้คำสุภาพบุรุษ เช่น "ครับ"
     - ใช้คำ "น่ะค่ะ", "นะค่ะ"
-    - ใช้เครื่องหมาย * มากเกินไป เช่น *   **เบอร์โทรศัพท์:** 0123-456-789
+    - ใช้เครื่องหมาย ** เน้นข้อความคำตอบ
     - ให้คำแนะนำหรือตอบว่า "ให้ติดต่อ ศท. กรณีมีปัญหาระบบ DPIS หรือเข้าใช้งาน dpis ไม่ได้"
 
 ## ตัวอย่างการตอบ:
@@ -600,6 +610,28 @@ if GEMINI_AVAILABLE and LOCAL_IMPORTS_AVAILABLE:
 
 คำถาม: "การลาออนไลน์ DPIS?", "การอนุมัติการลา?" , "การลากรณีย้ายกอง?", "การยกเลิก/แก้ไขเปลี่ยนแปลงวันลา?"
 คำตอบ: "สามารถดูรายละเอียดได้ที่ https://youtu.be/znoyzLmnAbw"
+
+คำถาม: "ติดต่อศูนย์เทคโนโลยีสารสนเทศและการสื่อสารได้ที่ไหน?"
+คำตอบ: 
+"Line Open Chat: MOJ IT Service Center 
+https://shorturl.moj.go.th/5zugu"
+
+คำถาม: "ติดต่อกองบริหารการคลังที่ไหน?"
+คำตอบ: 
+"Facebook Page กองบริหารการคลัง สำนักงานปลัดกระทรวงยุติธรรม 
+https://facebook.com/MOJFinancialAdministrationDivision"
+
+คำถาม: "ติดต่อศูนย์บริการร่วมกระทรวงยุติธรรมที่ไหน?"
+คำตอบ: 
+"- โทรศัพท์เคลื่อนที่ 0811740834 , 0632698063
+- จดหมาย: ตู้ไปรษณีย์ 3 หลักสี่ กรุงเทพมหานคร 10210
+- email: complainingcenter@moj.go.th
+- เว็บไซต์ mind.moj.go.th
+- แอปพลิเคชัน Justice Care
+- Facebook Page ศูนย์บริการร่วมกระทรวงยุติธรรม https://facebook.com/ServicelinksMOJ
+- Line ID: s.center10
+- ติดต่อสอบถามเพิ่มเติมได้ที่ โทร. 021415100 หรือ สายด่วนยุติธรรม 1111 กด 77"
+
 
 ## ข้อจำกัดและคำแนะนำ:
 - หากไม่แน่ใจในคำตอบ ให้แนะนำติดต่อ HR โดยตรง

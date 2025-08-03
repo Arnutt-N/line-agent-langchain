@@ -1,0 +1,99 @@
+/* เพิ่ม styles เหล่านี้ต่อท้าย styles ที่มีอยู่ใน admin-chat-ui.html */
+
+/* Dark Theme - Message Bubbles และองค์ประกอบเพิ่มเติม */
+[data-theme="dark"] .message-bubble {
+    background-color: #5865f2;  /* สีน้ำเงินสำหรับข้อความ user */
+    color: #ffffff;
+}
+
+[data-theme="dark"] .message-bubble.bot {
+    background-color: #f0b232;  /* สีเหลืองส้มสำหรับ bot */
+}
+
+[data-theme="dark"] .message-bubble.admin {
+    background-color: #5865f2;  /* สีน้ำเงินสำหรับ admin */
+}
+
+/* ปรับ active state ของ user card */
+[data-theme="dark"] .user-item.active {
+    background-color: #5865f2 !important;
+}
+
+[data-theme="dark"] .user-item.active .user-name,
+[data-theme="dark"] .user-item.active .user-status {
+    color: #ffffff !important;
+}
+
+/* ปรับสี header และ borders */
+[data-theme="dark"] .header {
+    background-color: #1e2124;
+    border-bottom-color: #282b30;
+}
+
+[data-theme="dark"] .sidebar {
+    border-right-color: #1e2124;
+}
+
+/* ปรับสี theme selector dropdown */
+[data-theme="dark"] .theme-selector .theme-dropdown {
+    background-color: #282b30;
+    border-color: #1e2124;
+}
+
+/* ปรับสี active theme option */
+[data-theme="dark"] .theme-option.active {
+    background-color: #5865f2;
+}
+
+/* ปรับสีปุ่มสีเขียว (ออนไลน์) */
+[data-theme="dark"] .nav-btn.success {
+    background-color: #43b581;
+}
+
+[data-theme="dark"] .nav-btn.success:hover {
+    background-color: #3ca374;
+}
+
+/* ปรับสี search box */
+[data-theme="dark"] .search-box input {
+    background-color: #1e2124;
+    border-color: #1e2124;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .search-box input::placeholder {
+    color: #72767d;
+}
+
+/* Message container background */
+[data-theme="dark"] .messages-container {
+    background-color: #1e2124;
+}
+
+/* Input area styling */
+[data-theme="dark"] .input-area {
+    background-color: #282b30;
+    border-top-color: #1e2124;
+}
+
+[data-theme="dark"] .message-input {
+    background-color: #40444b;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .message-input::placeholder {
+    color: #72767d;
+}
+
+/* Send button */
+[data-theme="dark"] .send-btn {
+    background-color: #5865f2;
+}
+
+[data-theme="dark"] .send-btn:hover {
+    background-color: #4752c4;
+}
+
+[data-theme="dark"] .send-btn:disabled {
+    background-color: #72767d;
+}

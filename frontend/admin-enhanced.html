@@ -1,0 +1,409 @@
+3-line text-xl"></i>
+              <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            
+            <!-- Theme Toggle -->
+            <button @click="toggleTheme()" class="p-2 text-gray-600 hover:text-gray-800">
+              <i class="ri-sun-line text-xl" x-show="!darkMode"></i>
+              <i class="ri-moon-line text-xl" x-show="darkMode"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content Area -->
+      <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
+        
+        <!-- Dashboard View -->
+        <div x-show="currentView === 'dashboard'" class="space-y-6">
+          
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Users Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-500">Total Users</p>
+                  <p class="text-3xl font-bold text-gray-800 mt-1">1,245</p>
+                  <p class="text-xs text-green-500 mt-2">
+                    <i class="ri-arrow-up-line"></i> 12% from last month
+                  </p>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center float">
+                  <i class="ri-user-line text-2xl text-white"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Chats Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-500">Active Chats</p>
+                  <p class="text-3xl font-bold text-gray-800 mt-1">23</p>
+                  <p class="text-xs text-green-500 mt-2">
+                    <i class="ri-arrow-up-line"></i> 5% from yesterday
+                  </p>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center float">
+                  <i class="ri-message-3-line text-2xl text-white"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Messages Today Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-500">Messages Today</p>
+                  <p class="text-3xl font-bold text-gray-800 mt-1">453</p>
+                  <p class="text-xs text-red-500 mt-2">
+                    <i class="ri-arrow-down-line"></i> 3% from yesterday
+                  </p>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center float">
+                  <i class="ri-chat-1-line text-2xl text-white"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Response Time Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-500">Avg Response Time</p>
+                  <p class="text-3xl font-bold text-gray-800 mt-1">1.2s</p>
+                  <p class="text-xs text-green-500 mt-2">
+                    <i class="ri-arrow-up-line"></i> 15% faster
+                  </p>
+                </div>
+                <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center float">
+                  <i class="ri-timer-line text-2xl text-white"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Section -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Messages Chart -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Messages Overview</h3>
+              <canvas id="messagesChart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- User Activity Chart -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">User Activity</h3>
+              <canvas id="activityChart" width="400" height="200"></canvas>
+            </div>
+          </div>
+
+          <!-- Recent Activities -->
+          <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Activities</h3>
+            <div class="space-y-4">
+              <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <i class="ri-user-add-line text-blue-600"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-800">New user registered</p>
+                  <p class="text-xs text-gray-500">John Doe joined the platform</p>
+                </div>
+                <span class="text-xs text-gray-400">2 min ago</span>
+              </div>
+              
+              <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                  <i class="ri-message-2-line text-green-600"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-800">New message received</p>
+                  <p class="text-xs text-gray-500">From: Jane Smith</p>
+                </div>
+                <span class="text-xs text-gray-400">5 min ago</span>
+              </div>
+              
+              <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                  <i class="ri-robot-line text-purple-600"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-800">Bot response sent</p>
+                  <p class="text-xs text-gray-500">Answered HR policy question</p>
+                </div>
+                <span class="text-xs text-gray-400">10 min ago</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat View -->
+        <div x-show="currentView === 'chat'" class="h-full flex">
+          <!-- Chat List -->
+          <div class="w-80 bg-white rounded-l-2xl shadow-lg overflow-hidden">
+            <div class="p-4 border-b">
+              <h3 class="font-semibold text-gray-800">Active Conversations</h3>
+            </div>
+            <div class="overflow-y-auto h-full">
+              <template x-for="chat in activeChats" :key="chat.id">
+                <div @click="selectChat(chat)" 
+                     class="flex items-center p-4 hover:bg-gray-50 cursor-pointer border-b"
+                     :class="{'bg-purple-50': selectedChat && selectedChat.id === chat.id}">
+                  <img :src="chat.avatar" :alt="chat.name" class="w-12 h-12 rounded-full">
+                  <div class="ml-3 flex-1">
+                    <p class="font-medium text-gray-800" x-text="chat.name"></p>
+                    <p class="text-sm text-gray-500 truncate" x-text="chat.lastMessage"></p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-xs text-gray-400" x-text="chat.time"></p>
+                    <span x-show="chat.unread > 0" 
+                          class="inline-block mt-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full" 
+                          x-text="chat.unread"></span>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Chat Window -->
+          <div class="flex-1 bg-white rounded-r-2xl shadow-lg flex flex-col">
+            <template x-if="selectedChat">
+              <div class="flex flex-col h-full">
+                <!-- Chat Header -->
+                <div class="p-4 border-b flex items-center justify-between">
+                  <div class="flex items-center">
+                    <img :src="selectedChat.avatar" :alt="selectedChat.name" class="w-10 h-10 rounded-full">
+                    <div class="ml-3">
+                      <p class="font-semibold text-gray-800" x-text="selectedChat.name"></p>
+                      <p class="text-xs text-gray-500">Active now</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <button class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg">
+                      <i class="ri-phone-line"></i>
+                    </button>
+                    <button class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg">
+                      <i class="ri-vidicon-line"></i>
+                    </button>
+                    <button class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg">
+                      <i class="ri-more-2-fill"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Messages Area -->
+                <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                  <template x-for="message in selectedChat.messages" :key="message.id">
+                    <div class="flex" :class="{'justify-end': message.sender === 'admin'}">
+                      <div class="message-bubble" :class="message.sender === 'admin' ? 'user' : 'bot'">
+                        <p x-text="message.text"></p>
+                        <p class="text-xs mt-1 opacity-70" x-text="message.time"></p>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+
+                <!-- Input Area -->
+                <div class="p-4 border-t">
+                  <div class="flex items-center space-x-2">
+                    <button class="p-2 text-gray-600 hover:text-gray-800">
+                      <i class="ri-attachment-line text-xl"></i>
+                    </button>
+                    <input type="text" 
+                           placeholder="Type a message..." 
+                           class="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                           @keydown.enter="sendMessage($event.target.value); $event.target.value = ''">
+                    <button class="p-2 bg-purple-600 text-white rounded-full hover:bg-purple-700">
+                      <i class="ri-send-plane-fill text-xl"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- No Chat Selected -->
+            <div x-show="!selectedChat" class="flex items-center justify-center h-full">
+              <div class="text-center">
+                <i class="ri-message-3-line text-6xl text-gray-300"></i>
+                <p class="mt-4 text-gray-500">Select a conversation to start chatting</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other Views (Users, Templates, Analytics, Settings) -->
+        <div x-show="currentView === 'users'" class="space-y-6">
+          <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">User Management</h3>
+            <p class="text-gray-600">User management interface will be implemented here.</p>
+          </div>
+        </div>
+
+        <div x-show="currentView === 'templates'" class="space-y-6">
+          <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Message Templates</h3>
+            <p class="text-gray-600">Template management interface will be implemented here.</p>
+          </div>
+        </div>
+
+        <div x-show="currentView === 'analytics'" class="space-y-6">
+          <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Analytics & Reports</h3>
+            <p class="text-gray-600">Analytics dashboard will be implemented here.</p>
+          </div>
+        </div>
+
+        <div x-show="currentView === 'settings'" class="space-y-6">
+          <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Settings</h3>
+            <p class="text-gray-600">System settings will be implemented here.</p>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function adminPanel() {
+      return {
+        sidebarOpen: true,
+        currentView: 'dashboard',
+        darkMode: false,
+        selectedChat: null,
+        
+        activeUsers: [
+          { id: 1, name: 'สมชาย ใจดี', avatar: 'https://ui-avatars.com/api/?name=สมชาย+ใจดี&background=random', lastMessage: 'ขอสอบถามเรื่องวันลา...', status: 'online', unread: 2 },
+          { id: 2, name: 'สมหญิง รักดี', avatar: 'https://ui-avatars.com/api/?name=สมหญิง+รักดี&background=random', lastMessage: 'ได้รับเอกสารแล้วค่ะ', status: 'online', unread: 0 },
+          { id: 3, name: 'สมศักดิ์ มั่นคง', avatar: 'https://ui-avatars.com/api/?name=สมศักดิ์+มั่นคง&background=random', lastMessage: 'รบกวนช่วยตรวจสอบ...', status: 'busy', unread: 1 },
+        ],
+        
+        activeChats: [
+          { 
+            id: 1, 
+            name: 'สมชาย ใจดี', 
+            avatar: 'https://ui-avatars.com/api/?name=สมชาย+ใจดี&background=random', 
+            lastMessage: 'ขอสอบถามเรื่องวันลาพักร้อนครับ', 
+            time: '10:30 AM',
+            unread: 2,
+            messages: [
+              { id: 1, sender: 'user', text: 'สวัสดีครับ', time: '10:25 AM' },
+              { id: 2, sender: 'admin', text: 'สวัสดีค่ะ มีอะไรให้ช่วยไหมคะ', time: '10:26 AM' },
+              { id: 3, sender: 'user', text: 'ขอสอบถามเรื่องวันลาพักร้อนครับ', time: '10:30 AM' },
+            ]
+          },
+          { 
+            id: 2, 
+            name: 'สมหญิง รักดี', 
+            avatar: 'https://ui-avatars.com/api/?name=สมหญิง+รักดี&background=random', 
+            lastMessage: 'ได้รับเอกสารแล้วค่ะ ขอบคุณมาก', 
+            time: '9:45 AM',
+            unread: 0,
+            messages: []
+          },
+        ],
+        
+        getCurrentTitle() {
+          const titles = {
+            dashboard: 'Dashboard Overview',
+            chat: 'Live Chat',
+            users: 'User Management',
+            templates: 'Message Templates',
+            analytics: 'Analytics & Reports',
+            settings: 'Settings'
+          };
+          return titles[this.currentView] || 'Dashboard';
+        },
+        
+        toggleTheme() {
+          this.darkMode = !this.darkMode;
+          document.documentElement.classList.toggle('dark');
+        },
+        
+        selectChat(chat) {
+          this.selectedChat = chat;
+          chat.unread = 0;
+        },
+        
+        sendMessage(text) {
+          if (!text.trim() || !this.selectedChat) return;
+          
+          this.selectedChat.messages.push({
+            id: Date.now(),
+            sender: 'admin',
+            text: text,
+            time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+          });
+        },
+        
+        init() {
+          // Initialize Charts
+          this.$nextTick(() => {
+            // Messages Chart
+            const messagesCtx = document.getElementById('messagesChart');
+            if (messagesCtx) {
+              new Chart(messagesCtx, {
+                type: 'line',
+                data: {
+                  labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                  datasets: [{
+                    label: 'User Messages',
+                    data: [120, 150, 180, 170, 210, 190, 230],
+                    borderColor: 'rgb(147, 51, 234)',
+                    backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                    tension: 0.4
+                  }, {
+                    label: 'Bot Responses',
+                    data: [100, 130, 160, 150, 190, 170, 200],
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                    }
+                  }
+                }
+              });
+            }
+            
+            // Activity Chart
+            const activityCtx = document.getElementById('activityChart');
+            if (activityCtx) {
+              new Chart(activityCtx, {
+                type: 'doughnut',
+                data: {
+                  labels: ['Active', 'Idle', 'Offline'],
+                  datasets: [{
+                    data: [45, 30, 25],
+                    backgroundColor: [
+                      'rgb(34, 197, 94)',
+                      'rgb(251, 146, 60)',
+                      'rgb(156, 163, 175)'
+                    ]
+                  }]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                    }
+                  }
+                }
+              });
+            }
+          });
+        }
+      }
+    }
+  </script>
+</body>
+</html>

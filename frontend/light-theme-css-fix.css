@@ -1,0 +1,160 @@
+/* ใส่ CSS นี้แทนที่ส่วน Light Theme UI Improvements ในไฟล์ admin-chat-ui.html */
+
+        /* Light Theme UI Improvements (Only for Light theme) */
+        /* Default theme is Light, so we use :root and [data-theme="light"] */
+        
+        /* Input Area */
+        :root .input-area,
+        [data-theme="light"] .input-area {
+            background-color: #FFFFFF;
+            border-top: 1px solid #E8EAED;
+            padding: 20px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        :root .input-container input,
+        [data-theme="light"] .input-container input {
+            background-color: #F8F9FA;
+            border: 2px solid #E8EAED;
+            transition: all 0.3s ease;
+        }
+
+        :root .input-container input:focus,
+        [data-theme="light"] .input-container input:focus {
+            background-color: #FFFFFF;
+            border-color: #2F66D0;
+            box-shadow: 0 0 0 3px rgba(47, 102, 208, 0.1);
+        }
+
+        /* Message Bubbles with shadows */
+        :root .message.bot .message-bubble,
+        [data-theme="light"] .message.bot .message-bubble {
+            background-color: #F49D0E !important;
+            box-shadow: 0 2px 8px rgba(244, 157, 14, 0.15);
+        }
+
+        :root .message.user .message-bubble,
+        [data-theme="light"] .message.user .message-bubble {
+            background-color: #2F66D0 !important;
+            box-shadow: 0 2px 8px rgba(47, 102, 208, 0.15);
+        }
+
+        /* Header styling */
+        :root .header,
+        [data-theme="light"] .header {
+            background-color: #FFFFFF;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #E8EAED;
+        }
+
+        /* Sidebar styling */
+        :root .sidebar,
+        [data-theme="light"] .sidebar {
+            background-color: #F8F9FA;
+            border-right: none;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.03);
+        }
+
+        :root .sidebar-header,
+        [data-theme="light"] .sidebar-header {
+            background-color: #F1F3F4;
+            border-bottom: 1px solid #E8EAED;
+        }
+
+        :root .sidebar-title,
+        [data-theme="light"] .sidebar-title {
+            color: #202124;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* User items */
+        :root .user-item,
+        [data-theme="light"] .user-item {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        :root .user-item:hover,
+        [data-theme="light"] .user-item:hover {
+            background-color: #E8EAED;
+        }
+
+        :root .user-item.active,
+        [data-theme="light"] .user-item.active {
+            background-color: #2F66D0;
+            color: white;
+        }
+
+        :root .user-item.active .user-name,
+        :root .user-item.active .user-status,
+        [data-theme="light"] .user-item.active .user-name,
+        [data-theme="light"] .user-item.active .user-status {
+            color: white;
+        }
+
+        /* Search box */
+        :root .search-box input,
+        [data-theme="light"] .search-box input {
+            background-color: #FFFFFF;
+            border-color: #E8EAED;
+            color: #202124;
+        }
+
+        :root .search-box input:focus,
+        [data-theme="light"] .search-box input:focus {
+            border-color: #2F66D0;
+            box-shadow: 0 0 0 2px rgba(47, 102, 208, 0.1);
+        }
+
+        /* Menu items */
+        :root .menu-item,
+        [data-theme="light"] .menu-item {
+            transition: all 0.2s ease;
+        }
+
+        :root .menu-item:hover,
+        [data-theme="light"] .menu-item:hover {
+            background-color: #E8EAED;
+        }
+
+        :root .menu-item.active,
+        [data-theme="light"] .menu-item.active {
+            background-color: #E8EAED;
+            border-left-color: #2F66D0;
+        }
+
+        /* Border removals for light theme */
+        :root .chat-area,
+        [data-theme="light"] .chat-area {
+            border: none;
+        }
+
+        :root .messages-container,
+        [data-theme="light"] .messages-container {
+            background-color: #FFFFFF;
+            border: none;
+        }
+
+        /* Mode toggle button */
+        :root .mode-btn.active,
+        [data-theme="light"] .mode-btn.active {
+            background-color: #2F66D0;
+            color: white;
+        }
+
+        /* Scrollbar for light theme */
+        :root ::-webkit-scrollbar-track,
+        [data-theme="light"] ::-webkit-scrollbar-track {
+            background: #F8F9FA;
+        }
+
+        :root ::-webkit-scrollbar-thumb,
+        [data-theme="light"] ::-webkit-scrollbar-thumb {
+            background: #DADCE0;
+        }
+
+        :root ::-webkit-scrollbar-thumb:hover,
+        [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+            background: #BDC1C6;
+        }

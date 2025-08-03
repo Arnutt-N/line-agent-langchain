@@ -1,0 +1,68 @@
+/* Fix สำหรับกล่องข้อความให้แสดงสีที่ถูกต้องในทุกธีม */
+/* เพิ่มส่วนนี้ใน admin-chat-ui.html หลัง styles ที่มีอยู่ */
+
+/* ตรวจสอบให้แน่ใจว่า message bubbles ใช้สีที่ถูกต้อง */
+.message.bot .message-bubble {
+    background-color: var(--message-bot) !important;
+    color: var(--message-bot-text) !important;
+}
+
+.message.user .message-bubble {
+    background-color: var(--message-user) !important;
+    color: var(--message-user-text) !important;
+}
+
+/* สำหรับ Dark Theme โดยเฉพาะ */
+[data-theme="dark"] .message.bot .message-bubble {
+    background-color: #f0b232 !important;  /* สีเหลืองส้ม */
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .message.user .message-bubble {
+    background-color: #5865f2 !important;  /* สีน้ำเงิน */
+    color: #ffffff !important;
+}
+
+/* สำหรับ Light Theme */
+[data-theme="light"] .message.bot .message-bubble {
+    background-color: #ea8600 !important;  /* สีส้ม */
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .message.user .message-bubble {
+    background-color: #4285f4 !important;  /* สีน้ำเงิน */
+    color: #ffffff !important;
+}
+
+/* สำหรับ Blue Theme */
+[data-theme="blue"] .message.bot .message-bubble {
+    background-color: #f57c00 !important;  /* สีส้ม */
+    color: #ffffff !important;
+}
+
+[data-theme="blue"] .message.user .message-bubble {
+    background-color: #1976d2 !important;  /* สีน้ำเงิน */
+    color: #ffffff !important;
+}
+
+/* สำหรับ Green Theme */
+[data-theme="green"] .message.bot .message-bubble {
+    background-color: #ff6f00 !important;  /* สีส้ม */
+    color: #ffffff !important;
+}
+
+[data-theme="green"] .message.user .message-bubble {
+    background-color: #43a047 !important;  /* สีเขียว */
+    color: #ffffff !important;
+}
+
+/* สำหรับ Purple Theme */
+[data-theme="purple"] .message.bot .message-bubble {
+    background-color: #ff6f00 !important;  /* สีส้ม */
+    color: #ffffff !important;
+}
+
+[data-theme="purple"] .message.user .message-bubble {
+    background-color: #8e24aa !important;  /* สีม่วง */
+    color: #ffffff !important;
+}

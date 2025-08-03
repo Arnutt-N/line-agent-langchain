@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINE Agent Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        /* Theme System */
+        :root {
+            /* Light Theme (Default) - ปรับปรุงใหม่ */
+            --bg-primary: #FFFFFF;      /* พื้นที่แชท */
+            --bg-secondary: #F8F9FA;    /* พื้นหลังรอง */
+            --bg-tertiary: #F1F3F4;     /* พื้นหลังเบา */
+            --bg-chat: #FFFFFF;         /* พื้นที่แชท */
+            --text-primary: #202124;    /* ข้อความหลัก */
+            --text-secondary: #5f6368;  /* ข้อความรอง */
+            --text-tertiary: #80868b;   /* ข้อความเบา */
+            --border-color: transparent; /* ไม่มี border ในพื้นที่แชท */
+            --sidebar-bg: #F8F9FA;      /* ไซด์บาร์ */
+            --sidebar-text: #3c4043;    /* ข้อความใน Sidebar */
+            --sidebar-hover: #E8EAED;   /* Sidebar hover */
+            --header-bg: #FFFFFF;       /* นาฟบาร์ */
+            --message-user: #2F66D0;    /* สีน้ำเงินสำหรับ user */
+            --message-bot: #F49D0E;     /* สีเหลืองส้มสำหรับ bot */
+            --message-user-text: #ffffff;
+            --message-bot-text: #ffffff;
+            --input-bg: #F8F9FA;        /* ช่องพิมพ์ */
+            --shadow: rgba(60, 64, 67, 0.08);
+        }
+
+        [data-theme="dark"] {
+            /* Background Colors - ตามที่กำหนด */
+            --bg-primary: #11182A;      /* พื้นที่แชท */
+            --bg-secondary: #1F2A3C;    /* พื้นหลังรอง */
+            --bg-tertiary: #11182A;     /* พื้นหลังเข้มสุด */
+            --bg-chat: #11182A;         /* พื้นที่แชท */
+            --text-primary: #ffffff;    /* ข้อความหลัก - ขาว */
+            --text-secondary: #b9bbbe;  /* ข้อความรอง */
+            --text-tertiary: #72767d;   /* ข้อความอ่อน */
+            --border-color: transparent; /* ไม่มี border */
+            --sidebar-bg: #1F2A3C;      /* ไซด์บาร์ */
+            --sidebar-text: #ffffff;    /* ข้อความใน Sidebar */
+            --sidebar-hover: #283648;   /* Sidebar hover effect */
+            --header-bg: #1F2A3C;       /* นาฟบาร์ */
+            --message-user: #2F66D0;    /* สีน้ำเงินสำหรับ user messages */
+            --message-bot: #F49D0E;     /* สีเหลืองส้มสำหรับ bot */
+            --message-user-text: #ffffff;
+            --message-bot-text: #ffffff;
+            --input-bg: #1F2A3C;        /* ช่องพิมพ์แชท */
+            --shadow: rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="semi-dark"] {
+            --bg-primary: #F3F3F5;      /* พื้นที่แชท - เทาอ่อน */
+            --bg-secondary: #F3F3F5;    /* พื้นหลังรอง */
+            --bg-tertiary: #F3F3F5;     /* พื้นหลังเข้มสุด */
+            --bg-chat: #F3F3F5;         /* พื้นที่แชท */
+            --text-primary: #202124;    /* ข้อความหลัก - ดำ */
+            --text-secondary: #5f6368;  /* ข้อความรอง */
+            --text-tertiary: #80868b;   /* ข้อความอ่อน */
+            --border-color: transparent; /* ลบ border พื้นที่แชท */
+            --sidebar-bg: #1F2A3C;      /* ไซด์บาร์ - น้ำเงินเข้ม */
+            --sidebar-text: #ffffff;    /* ข้อความใน Sidebar - ขาว */
+            --sidebar-hover: #283648;   /* Sidebar hover */
+            --header-bg: #FFFFFF;       /* นาฟบาร์ - ขาว */
+            --message-user: #2F66D0;    /* กล่องข้อความ user - น้ำเงิน */
+            --message-bot: #F49D0E;     /* กล่องข้อความ bot - เหลืองส้ม */
+            --message-user-text: #ffffff;
+            --message-bot-text: #ffffff;
+            --input-bg: #FFFFFF;        /* ช่องพิมพ์แชท - ขาว */
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="semi-dark"] .header {
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #e8eaed;
+        }
+
+        [data-theme="semi-dark"] .mode-toggle {
+            --bg-tertiary: #f1f3f4;
+        }
+
+        [data-theme="semi-dark"] .theme-btn:hover,
+        [data-theme="semi-dark"] .settings-btn:hover {
+            --bg-tertiary: #f1f3f4;
+        }
+
+        [data-theme="blue"] {
+            --bg-primary: #e3f2fd;
+            --bg-secondary: #bbdefb;
+            --bg-tertiary: #90caf9;
+            --bg-chat: #e3f2fd;
+            --text-primary: #0d47a1;
+            --text-secondary: #1565c0;
+            --text-tertiary: #1976d2;
+            --border-color: #90caf9;
+            --sidebar-bg: #bbdefb;
+            --sidebar-text: #0d47a1;
+            --sidebar-hover: #90caf9;
+            --header-bg: #1976d2;
+            --message-user: #1976d2;
+            --message-bot: #f57c00;
+            --message-user-text: #ffffff;
+            --message-bot-text: #ffffff;
+            --input-bg: #e3f2fd;
+            --shadow: rgba(33, 150, 243, 0.2);
+        }
+
+        [data-theme="green"] {
+            --bg-primary: #e8f5e9;
+            --bg-secondary: #c8e6c9;
+            --bg-tertiary: #a5d6a7;
+            --bg-chat: #e8f5e9;
+            --text-primary: #1b5e20;
+            --text-secondary: #2e7d32;
+            --text-tertiary: #388e3c;
+            --border-color: #81c784;
+            --sidebar-bg: #c8e6c9;
+            --sidebar-text: #1b5e20;
+            --sidebar-hover: #a5d6a7;
+            --header-bg: #43a047;
+            --message-user: #43a047;
+            --message-bot: #ff6f00;
+            --message-user-text: #ffffff;
+            --message-bot-text: #ffffff;
+            --input-bg: #e8f5e9;
+            --shadow: rgba(76, 175, 80, 0.2);
+        }
+
+        [data-theme="purple"] {
+            --bg-primary: #f3e5f5;
+            --bg-secondary: #e1bee7;
+            --bg-tertiary: #ce93d8;
+            --bg-chat: #f3e5f5;
+            --text-primary: #4a148c;
+            --text-secondary: #6a1b9a;
+            --text-tertiary: #7b1fa2;
+            --border-color: #ba68c8;
+            --sidebar-bg: #e1bee7;
+            --sidebar-text: #4a148c;
+            --sidebar-hover: #ce93d8;
+            --header-bg: #8e24aa;
+            --message-user: #8e24aa;
+            --message-bot: #ff6f00;
+            --message-user-text: #ffffff;
+            --message-bot-text: #ffffff;
+            --input-bg: #f3e5f5;
+            --shadow: rgba(156, 39, 176, 0.2);
+        }
+
+        /* Additional Dark Theme Styles */
+        [data-theme="dark"] .user-item:hover {
+            background-color: #283648;
+            transition: background-color 0.3s ease;
+        }
+
+        [data-theme="dark"] .user-item.active {
+            background-color: #2F66D0;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .menu-item:hover {
+            background-color: #283648;
+            transition: background-color 0.3s ease;
+        }
+
+        [data-theme="dark"] .menu-item.active {
+            background-color: #283648;
+            border-left-color: #2F66D0;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .mode-btn.active {
+            background-color: #2F66D0;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .nav-btn.success {
+            background-color: #43b581;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] input {
+            background-color: #1F2A3C;
+            border-color: #283648;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] input:focus {
+            border-color: #2F66D0;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(47, 102, 208, 0.2);
+        }
+
+        [data-theme="dark"] .search-box input {
+            background-color: #11182A;
+            border-color: #283648;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .theme-btn:hover,
+        [data-theme="dark"] .settings-btn:hover {
+            background-color: #283648;
+            transition: background-color 0.3s ease;
+        }
+
+        [data-theme="dark"] .theme-dropdown,
+        [data-theme="dark"] .settings-dropdown {
+            background-color: #11182A;
+            border-color: #1F2A3C;
+        }
+
+        [data-theme="dark"] .theme-option:hover,
+        [data-theme="dark"] .settings-option:hover {
+            background-color: #1F2A3C;
+            transition: background-color 0.3s ease;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-track {
+            background: #1F2A3C;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: #283648;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+            background: #32404f;
+        }
+
+        /* Additional Dark Theme Border Adjustments */
+        [data-theme="dark"] .sidebar {
+            border-right-color: transparent;  /* ลบ border ระหว่าง sidebar กับพื้นที่แชท */
+        }
+
+        [data-theme="dark"] .header {
+            border-bottom-color: transparent;  /* ลบ border ระหว่าง header กับพื้นที่แชท */
+        }
+
+        [data-theme="dark"] .input-area {
+            background-color: #11182A;
+            border-top-color: transparent;  /* ลบ border ระหว่างพื้นที่แชทกับช่องพิมพ์ */
+            padding: 20px;  /* Better spacing */
+        }
+
+        [data-theme="dark"] .sidebar-header {
+            border-bottom-color: #283648;
+            padding: 20px;  /* Better spacing */
+        }
+
+        [data-theme="dark"] .user-item {
+            border-bottom-color: #283648;
+            padding: 12px 20px;  /* Better spacing */
+        }
+
+        [data-theme="dark"] .message-input {
+            background-color: #1F2A3C;
+            border-color: #283648;
+            padding: 12px 50px 12px 20px;  /* Better spacing */
+        }
+        
+        [data-theme="dark"] .chat-area {
+            border: none;  /* ลบ border รอบพื้นที่แชท */
+        }
+        
+        [data-theme="dark"] .messages-container {
+            border: none;  /* ลบ border ของ container ข้อความ */
+            padding: 20px;  /* Better spacing */
+        }
+
+        /* Message bubbles better spacing */
+        [data-theme="dark"] .message {
+            margin-bottom: 16px;  /* Better spacing between messages */
+        }
+
+        [data-theme="dark"] .message-bubble {
+            padding: 12px 16px;  /* Better padding inside bubbles */
+        }
+
+        /* Menu items better spacing */
+        [data-theme="dark"] .menu-item {
+            padding: 12px 20px;  /* Better spacing */
+        }
+
+        /* Header better spacing */
+        [data-theme="dark"] .header {
+            padding: 16px 20px;  /* Better spacing */
+        }
+
+        /* Fix Message Bubbles Colors for All Themes */
+        .message.bot .message-bubble {
+            background-color: var(--message-bot) !important;
+            color: var(--message-bot-text) !important;
+        }
+
+        .message.user .message-bubble {
+            background-color: var(--message-user) !important;
+            color: var(--message-user-text) !important;
+        }
+
+        /* Specific Dark Theme Message Bubbles */
+        [data-theme="dark"] .message.bot .message-bubble {
+            background-color: #F49D0E !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(244, 157, 14, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .message.user .message-bubble {
+            background-color: #2F66D0 !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(47, 102, 208, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        /* Dark Theme Visual Enhancements */
+        /* Remove all borders */
+        [data-theme="dark"] .sidebar {
+            border-right: none;
+        }
+
+        [data-theme="dark"] .header {
+            border-bottom: none;
+        }
+
+        [data-theme="dark"] .input-area {
+            border-top: none;
+        }
+
+        [data-theme="dark"] .chat-area {
+            border: none;
+        }
+
+        /* Enhanced title styling */
+        [data-theme="dark"] .sidebar-title {
+            color: #FFFFFF;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        /* Input area enhancements */
+        [data-theme="dark"] .input-area {
+            background-color: #11182A;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .input-container input {
+            background-color: #1F2A3C;
+            border: 2px solid #283648;
+            padding: 12px 50px 12px 20px;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .input-container input:focus {
+            border-color: #2F66D0;
+            box-shadow: 0 0 0 3px rgba(47, 102, 208, 0.2);
+            background-color: #283648;
+        }
+
+        /* User item enhancements */
+        [data-theme="dark"] .user-item {
+            transition: all 0.2s ease;
+            padding: 12px 20px;
+            border-bottom: none !important;  /* ไม่มี border */
+        }
+
+        [data-theme="dark"] .user-item:hover {
+            background-color: #283648;
+        }
+
+        [data-theme="dark"] .user-item.active {
+            background-color: #2F66D0;
+        }
+
+        /* Dark theme user text colors */
+        [data-theme="dark"] .user-name {
+            color: #ffffff !important;  /* ชื่อสีขาว */
+        }
+
+        [data-theme="dark"] .user-status {
+            color: rgba(255, 255, 255, 0.7) !important;  /* สถานะสีขาวโปร่งแสง */
+        }
+
+        [data-theme="dark"] .user-item:hover .user-name,
+        [data-theme="dark"] .user-item:hover .user-status {
+            color: #ffffff !important;
+        }
+
+        /* Menu item enhancements */
+        [data-theme="dark"] .menu-item {
+            transition: all 0.2s ease;
+            padding: 12px 20px;
+        }
+
+        [data-theme="dark"] .menu-item:hover {
+            background-color: #283648;
+        }
+
+        [data-theme="dark"] .menu-item.active {
+            background-color: #283648;
+            border-left: 3px solid #2F66D0;
+        }
+
+        /* Search box enhancements */
+        [data-theme="dark"] .search-box input {
+            background-color: #11182A;
+            border: 1px solid #283648;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .search-box input:focus {
+            border-color: #2F66D0;
+            box-shadow: 0 0 0 2px rgba(47, 102, 208, 0.2);
+        }
+
+        /* Button enhancements */
+        [data-theme="dark"] .mode-btn {
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .mode-btn.active {
+            background-color: #2F66D0;
+            box-shadow: 0 2px 4px rgba(47, 102, 208, 0.3);
+        }
+
+        [data-theme="dark"] .nav-btn {
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .nav-btn.success {
+            background-color: #43b581;
+            box-shadow: 0 2px 4px rgba(67, 181, 129, 0.3);
+        }
+
+        [data-theme="dark"] .nav-btn.success:hover {
+            background-color: #3ca374;
+            transform: translateY(-1px);
+        }
+
+        /* Messages container */
+        [data-theme="dark"] .messages-container {
+            padding: 20px;
+        }
+
+        /* Enhanced scrollbar */
+        [data-theme="dark"] ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-track {
+            background: #1F2A3C;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: #283648;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+            background: #32404f;
+        }
+
+        /* Semi-dark specific styles */
+        [data-theme="semi-dark"] .header {
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #e8eaed;
+        }
+
+        [data-theme="semi-dark"] .mode-toggle {
+            --bg-tertiary: #f1f3f4;
+        }
+
+        [data-theme="semi-dark"] .theme-btn:hover,
+        [data-theme="semi-dark"] .settings-btn:hover {
+            --bg-tertiary: #f1f3f4;
+        }
+
+        /* Semi-dark Theme Visual Enhancements */
+        /* Sidebar ให้เหมือน Dark theme ทุกองค์ประกอบ */
+        
+        /* 1. Sidebar Container */
+        [data-theme="semi-dark"] .sidebar {
+            background-color: #1F2A3C !important;
+            border-right: none;
+            color: #ffffff;
+        }
+
+        /* 2. Sidebar Header */
+        [data-theme="semi-dark"] .sidebar-header {
+            background-color: #1F2A3C;  /* ใช้สีเดียวกับ sidebar bg */
+            border-bottom: 1px solid #283648;
+            padding: 20px;
+        }
+
+        /* 3. Sidebar Title */
+        [data-theme="semi-dark"] .sidebar-title {
+            color: #FFFFFF;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        /* 4. Search Box - เหมือน Dark */
+        [data-theme="semi-dark"] .search-box input {
+            background-color: #11182A !important;
+            border: 1px solid #283648 !important;
+            color: #ffffff !important;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="semi-dark"] .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+
+        [data-theme="semi-dark"] .search-box input:focus {
+            border-color: #2F66D0 !important;
+            box-shadow: 0 0 0 2px rgba(47, 102, 208, 0.2);
+        }
+
+        /* 5. Menu Section */
+        [data-theme="semi-dark"] .menu-section {
+            padding: 10px 0;
+        }
+
+        /* 6. Menu Items - เหมือน Dark */
+        [data-theme="semi-dark"] .menu-item {
+            transition: all 0.2s ease;
+            padding: 12px 20px;
+            color: #ffffff !important;
+        }
+
+        [data-theme="semi-dark"] .menu-item:hover {
+            background-color: #283648;
+            color: #ffffff !important;
+        }
+
+        [data-theme="semi-dark"] .menu-item.active {
+            background-color: #283648;
+            border-left: 3px solid #2F66D0;
+            color: #ffffff !important;
+        }
+
+        [data-theme="semi-dark"] .menu-item i {
+            color: #ffffff !important;
+        }
+
+        [data-theme="semi-dark"] .menu-item span {
+            color: #ffffff !important;
+        }
+
+        /* 7. Menu Divider */
+        [data-theme="semi-dark"] .menu-divider {
+            height: 1px;
+            background-color: #283648;
+            margin: 10px 20px;
+        }
+
+        /* 8. User Items - เหมือน Dark */
+        [data-theme="semi-dark"] .user-item {
+            border-bottom: none !important;
+            transition: all 0.2s ease;
+            padding: 12px 20px;
+        }
+
+        [data-theme="semi-dark"] .user-item:hover {
+            background-color: #283648;
+        }
+
+        [data-theme="semi-dark"] .user-item.active {
+            background-color: #2F66D0;
+        }
+
+        /* 9. User text colors - เหมือน Dark */
+        [data-theme="semi-dark"] .user-name {
+            color: #ffffff !important;
+        }
+
+        [data-theme="semi-dark"] .user-status {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        [data-theme="semi-dark"] .user-item:hover .user-name,
+        [data-theme="semi-dark"] .user-item:hover .user-status {
+            color: #ffffff !important;
+        }
+
+        [data-theme="semi-dark"] .user-item.active .user-name,
+        [data-theme="semi-dark"] .user-item.active .user-status {
+            color: #ffffff !important;
+        }
+
+        /* 10. User Avatar & Indicators */
+        [data-theme="semi-dark"] .user-avatar {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="semi-dark"] .online-indicator {
+            border-color: #1F2A3C;
+        }
+
+        [data-theme="semi-dark"] .unread-count {
+            background-color: #2F66D0;
+            color: #ffffff;
+        }
+
+        /* 11. Scrollbar สำหรับ Sidebar - เหมือน Dark */
+        [data-theme="semi-dark"] .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        [data-theme="semi-dark"] .sidebar::-webkit-scrollbar-track {
+            background: #1F2A3C;
+        }
+
+        [data-theme="semi-dark"] .sidebar::-webkit-scrollbar-thumb {
+            background: #283648;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        [data-theme="semi-dark"] .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #32404f;
+        }
+
+        /* 12. Theme & Settings Dropdowns - ปรับให้เข้ากับ navbar สีขาว */
+        [data-theme="semi-dark"] .theme-dropdown,
+        [data-theme="semi-dark"] .settings-dropdown {
+            background-color: #FFFFFF !important;
+            border: 1px solid #E8EAED !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        [data-theme="semi-dark"] .theme-option,
+        [data-theme="semi-dark"] .settings-option {
+            color: #202124 !important;
+            background-color: #FFFFFF !important;
+        }
+
+        [data-theme="semi-dark"] .theme-option:hover,
+        [data-theme="semi-dark"] .settings-option:hover {
+            background-color: #F8F9FA !important;
+            color: #202124 !important;
+        }
+
+        [data-theme="semi-dark"] .theme-option.active {
+            background-color: #E8F0FE !important;
+            color: #1A73E8 !important;
+        }
+
+        /* Theme & Settings buttons in navbar */
+        [data-theme="semi-dark"] .theme-btn,
+        [data-theme="semi-dark"] .settings-btn {
+            color: #5f6368 !important;
+        }
+
+        [data-theme="semi-dark"] .theme-btn:hover,
+        [data-theme="semi-dark"] .settings-btn:hover {
+            background-color: #F1F3F4 !important;
+            color: #202124 !important;
+        }
+
+        /* 13. Override any conflicting styles */
+        [data-theme="semi-dark"] .sidebar * {
+            color: inherit;
+        }
+
+        /* Continue with other Semi-dark enhancements... */
+        /* Header/Navbar styling for Semi-dark */
+        [data-theme="semi-dark"] .header {
+            background-color: #FFFFFF !important;
+            border-bottom: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Header text colors */
+        [data-theme="semi-dark"] .header-title {
+            color: #202124 !important;
+        }
+
+        [data-theme="semi-dark"] .header-subtitle {
+            color: #5f6368 !important;
+        }
+
+        /* Mode toggle buttons in header */
+        [data-theme="semi-dark"] .mode-toggle {
+            background-color: #F1F3F4 !important;
+        }
+
+        [data-theme="semi-dark"] .mode-btn {
+            color: #5f6368 !important;
+            background-color: transparent !important;
+        }
+
+        [data-theme="semi-dark"] .mode-btn:hover {
+            background-color: #E8EAED !important;
+            color: #202124 !important;
+        }
+
+        [data-theme="semi-dark"] .mode-btn.active {
+            background-color: #2F66D0 !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Navigation buttons */
+        [data-theme="semi-dark"] .nav-btn {
+            color: #5f6368 !important;
+        }
+
+        [data-theme="semi-dark"] .nav-btn:hover {
+            background-color: #F1F3F4 !important;
+            color: #202124 !important;
+        }
+
+        [data-theme="semi-dark"] .nav-btn.success {
+            background-color: #43b581 !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Icons in header */
+        [data-theme="semi-dark"] .header i {
+            color: #5f6368 !important;
+        }
+
+        [data-theme="semi-dark"] .header .mode-btn.active i {
+            color: #FFFFFF !important;
+        }
+
+        [data-theme="semi-dark"] .chat-area {
+            border: none;
+        }
+
+        [data-theme="semi-dark"] .messages-container {
+            background-color: #F3F3F5;
+            border: none;
+            padding: 20px;
+        }
+
+        /* Input area enhancements */
+        [data-theme="semi-dark"] .input-area {
+            background-color: #FFFFFF;
+            border-top: none;
+            padding: 20px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="semi-dark"] .input-container input {
+            background-color: #F8F9FA;
+            border: 2px solid #E8EAED;
+            padding: 12px 50px 12px 20px;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="semi-dark"] .input-container input:focus {
+            background-color: #FFFFFF;
+            border-color: #2F66D0;
+            box-shadow: 0 0 0 3px rgba(47, 102, 208, 0.1);
+        }
+
+        /* Message bubbles with shadow */
+        [data-theme="semi-dark"] .message.bot .message-bubble {
+            background-color: #F49D0E !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(244, 157, 14, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="semi-dark"] .message.user .message-bubble {
+            background-color: #2F66D0 !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(47, 102, 208, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar styling */
+        [data-theme="semi-dark"] .sidebar-header {
+            background-color: #1A2332;
+            border-bottom: 1px solid #283648;
+            padding: 20px;
+        }
+
+        [data-theme="semi-dark"] .sidebar-title {
+            color: #FFFFFF;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.5px;
+        }
+
+        /* User items - เหมือน Dark theme */
+        [data-theme="semi-dark"] .user-item {
+            border-bottom: none !important;  /* ไม่มี border เหมือน Dark */
+            transition: all 0.2s ease;
+            padding: 12px 20px;
+        }
+
+        [data-theme="semi-dark"] .user-item:hover {
+            background-color: #283648;
+        }
+
+        [data-theme="semi-dark"] .user-item.active {
+            background-color: #2F66D0;
+        }
+
+        /* Semi-dark user text colors - เหมือน Dark */
+        [data-theme="semi-dark"] .user-name {
+            color: #ffffff !important;  /* ชื่อสีขาวเหมือน Dark */
+        }
+
+        [data-theme="semi-dark"] .user-status {
+            color: rgba(255, 255, 255, 0.7) !important;  /* สถานะสีขาวโปร่งแสง */
+        }
+
+        [data-theme="semi-dark"] .user-item:hover .user-name,
+        [data-theme="semi-dark"] .user-item:hover .user-status {
+            color: #ffffff !important;
+        }
+
+        [data-theme="semi-dark"] .user-item.active .user-name,
+        [data-theme="semi-dark"] .user-item.active .user-status {
+            color: #ffffff !important;
+        }
+
+        /* Additional user item styles for Semi-dark */
+        [data-theme="semi-dark"] .user-avatar {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="semi-dark"] .online-indicator {
+            border-color: #1F2A3C;
+        }
+
+        [data-theme="semi-dark"] .unread-count {
+            background-color: #2F66D0;
+            color: #ffffff;
+        }
+
+        /* Search box */
+        [data-theme="semi-dark"] .search-box input {
+            background-color: #283648;
+            border-color: #283648;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="semi-dark"] .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        [data-theme="semi-dark"] .search-box input:focus {
+            background-color: #32404F;
+            border-color: #2F66D0;
+            box-shadow: 0 0 0 2px rgba(47, 102, 208, 0.2);
+        }
+
+        /* Menu items - เหมือน Dark theme */
+        [data-theme="semi-dark"] .menu-item {
+            transition: all 0.2s ease;
+            padding: 12px 20px;
+            color: #ffffff;  /* สีขาวเหมือน Dark */
+        }
+
+        [data-theme="semi-dark"] .menu-item:hover {
+            background-color: #283648;
+        }
+
+        [data-theme="semi-dark"] .menu-item.active {
+            background-color: #283648;
+            border-left: 3px solid #2F66D0;
+        }
+
+        [data-theme="semi-dark"] .menu-item i {
+            color: #ffffff;  /* ไอคอนสีขาว */
+        }
+
+        /* Menu section styling เหมือน Dark */
+        [data-theme="semi-dark"] .menu-section {
+            padding: 10px 0;
+        }
+
+        [data-theme="semi-dark"] .menu-divider {
+            height: 1px;
+            background-color: #283648;
+            margin: 10px 20px;
+        }
+
+        /* Menu text color */
+        [data-theme="semi-dark"] .menu-item span {
+            color: #ffffff;
+        }
+
+        /* Override sidebar text colors for menu consistency */
+        [data-theme="semi-dark"] .sidebar .menu-item {
+            color: #ffffff !important;
+        }
+
+        [data-theme="semi-dark"] .sidebar .menu-item:hover {
+            color: #ffffff !important;
+            background-color: #283648;
+        }
+
+        [data-theme="semi-dark"] .sidebar .menu-item.active {
+            color: #ffffff !important;
+        }
+
+        /* Buttons */
+        [data-theme="semi-dark"] .mode-btn {
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="semi-dark"] .mode-btn.active {
+            background-color: #2F66D0;
+            color: white;
+            box-shadow: 0 2px 4px rgba(47, 102, 208, 0.2);
+        }
+
+        [data-theme="semi-dark"] .nav-btn {
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="semi-dark"] .nav-btn.success {
+            background-color: #43b581;
+            box-shadow: 0 2px 4px rgba(67, 181, 129, 0.2);
+        }
+
+        [data-theme="semi-dark"] .nav-btn.success:hover {
+            background-color: #3ca374;
+            transform: translateY(-1px);
+        }
+
+        /* Scrollbar for sidebar */
+        [data-theme="semi-dark"] .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        [data-theme="semi-dark"] .sidebar::-webkit-scrollbar-track {
+            background: #1F2A3C;
+        }
+
+        [data-theme="semi-dark"] .sidebar::-webkit-scrollbar-thumb {
+            background: #293647;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        [data-theme="semi-dark"] .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #32404F;
+        }
+
+        /* Messages area scrollbar */
+        [data-theme="semi-dark"] .messages-container::-webkit-scrollbar-track {
+            background: #F3F3F5;
+        }
+
+        [data-theme="semi-dark"] .messages-container::-webkit-scrollbar-thumb {
+            background: #DADCE0;
+        }
+
+        [data-theme="semi-dark"] .messages-container::-webkit-scrollbar-thumb:hover {
+            background: #BDC1C6;
+        }
+
+
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* Main Layout */
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        /* Menu Items */
+        .menu-section {
+            padding: 10px 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background-color: var(--sidebar-hover);
+        }
+
+        .menu-item.active {
+            background-color: var(--sidebar-hover);
+            border-left: 3px solid #4285f4;
+        }
+
+        .menu-item i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        /* Collapsible Menu */
+        .menu-item.has-submenu {
+            position: relative;
+        }
+
+        .menu-item.has-submenu::after {
+            content: '\e9c5';
+            font-family: 'remixicon';
+            position: absolute;
+            right: 20px;
+            transition: transform 0.2s;
+        }
+
+        .menu-item.has-submenu.expanded::after {
+            transform: rotate(90deg);
+        }
+
+        .submenu {
+            display: none;
+            padding-left: 20px;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .submenu.show {
+            display: block;
+        }
+
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 20px 8px 36px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .submenu-item:hover {
+            color: var(--text-primary);
+            background-color: var(--sidebar-hover);
+        }
+
+        .submenu-item i {
+            width: 20px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        /* Search Box in Submenu */
+        .search-box {
+            padding: 10px 20px 10px 36px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+        }
+
+        /* User List */
+        .user-list {
+            padding: 5px 0;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 20px 8px 36px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .user-item:hover {
+            background-color: var(--sidebar-hover);
+        }
+
+        .user-item.active {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--header-bg);
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+
+        .header-title h1 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-user img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .header-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .header-user-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px;
+            background-color: var(--bg-tertiary);
+            border-radius: 20px;
+        }
+
+        .mode-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 15px;
+            font-size: 13px;
+            cursor: pointer;
+            background-color: transparent;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn.success {
+            background-color: #34a853;
+            color: white;
+        }
+
+        /* Theme Selector */
+        .theme-selector {
+            position: relative;
+        }
+
+        .theme-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .theme-btn:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .theme-btn i {
+            font-size: 20px;
+            color: var(--text-primary);
+        }
+
+        .theme-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 12px var(--shadow);
+            min-width: 180px;  /* เพิ่มความกว้างขั้นต่ำ */
+            display: none;
+            z-index: 1000;
+        }
+
+        .theme-dropdown.show {
+            display: block;
+        }
+
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;  /* ไม่ให้ข้อความขึ้นบรรทัดใหม่ */
+        }
+
+        .theme-option span {
+            white-space: nowrap;  /* ไม่ให้ text wrap */
+        }
+
+        .theme-option:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .theme-option.active {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        .theme-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        /* Settings Dropdown */
+        .settings-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 10px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 12px var(--shadow);
+            min-width: 200px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .settings-dropdown.show {
+            display: block;
+        }
+
+        .settings-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .settings-option:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .settings-option span {
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 40px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .toggle-switch.active {
+            background-color: #4285f4;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: white;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        /* Settings Icon */
+        .settings-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+
+        .settings-btn:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .settings-btn i {
+            font-size: 20px;
+            color: var(--text-primary);
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            background-color: var(--bg-chat);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin: 0 10px;
+        }
+
+        .message.user .message-avatar {
+            order: 2;
+        }
+
+        .message-content {
+            max-width: 60%;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .message.bot .message-bubble {
+            background-color: var(--message-bot);
+            color: var(--message-bot-text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .message-bubble {
+            background-color: var(--message-user);
+            color: var(--message-user-text);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 5px;
+            padding: 0 5px;
+        }
+
+        .message.user .message-time {
+            text-align: right;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 15px 20px;
+            background-color: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 12px 50px 12px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-actions {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 5px;
+        }
+
+        .input-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .input-action:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .input-action i {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        .send-btn {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .send-btn:hover {
+            background-color: #3367d6;
+        }
+
+        .send-btn i {
+            font-size: 20px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-tertiary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">LINE Agent Admin</h2>
+            </div>
+            
+            <nav class="menu-section">
+                <!-- FAQ -->
+                <a href="#" class="menu-item">
+                    <i class="ri-question-line"></i>
+                    <span>FAQ</span>
+                </a>
+                
+                <!-- Message Templates -->
+                <a href="#" class="menu-item">
+                    <i class="ri-file-text-line"></i>
+                    <span>Message Templates</span>
+                </a>
+                
+                <!-- Dashboard -->
+                <a href="#" class="menu-item">
+                    <i class="ri-dashboard-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <!-- Analytics -->
+                <a href="#" class="menu-item">
+                    <i class="ri-bar-chart-box-line"></i>
+                    <span>Analytics</span>
+                </a>
+                
+                <!-- Chat Histories -->
+                <a href="#" class="menu-item">
+                    <i class="ri-history-line"></i>
+                    <span>Chat Histories</span>
+                </a>
+                
+                <!-- Live Chat -->
+                <div class="menu-item has-submenu expanded" onclick="toggleSubmenu(this, 'liveChatSubmenu')">
+                    <i class="ri-message-3-line"></i>
+                    <span>Live Chat</span>
+                </div>
+                <div class="submenu show" id="liveChatSubmenu">
+                    <div class="search-box">
+                        <input type="text" placeholder="ค้นหาผู้ใช้...">
+                    </div>
+                    <div class="user-list">
+                        <div class="user-item active">
+                            <img src="https://ui-avatars.com/api/?name=User001&background=4285f4&color=fff" alt="User" class="user-avatar">
+                            <div class="user-info">
+                                <div class="user-name">User001</div>
+                            </div>
+                        </div>
+                        <div class="user-item">
+                            <img src="https://ui-avatars.com/api/?name=User002&background=8e24aa&color=fff" alt="User" class="user-avatar">
+                            <div class="user-info">
+                                <div class="user-name">User002</div>
+                            </div>
+                        </div>
+                        <div class="user-item">
+                            <img src="https://ui-avatars.com/api/?name=User003&background=ea8600&color=fff" alt="User" class="user-avatar">
+                            <div class="user-info">
+                                <div class="user-name">User003</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- File Manager -->
+                <div class="menu-item has-submenu" onclick="toggleSubmenu(this, 'fileManagerSubmenu')">
+                    <i class="ri-folder-3-line"></i>
+                    <span>File Manager</span>
+                </div>
+                <div class="submenu" id="fileManagerSubmenu">
+                    <a href="#" class="submenu-item">
+                        <i class="ri-file-text-line"></i>
+                        <span>documents</span>
+                    </a>
+                    <a href="#" class="submenu-item">
+                        <i class="ri-file-list-3-line"></i>
+                        <span>csv</span>
+                    </a>
+                    <a href="#" class="submenu-item">
+                        <i class="ri-file-excel-2-line"></i>
+                        <span>excel</span>
+                    </a>
+                    <a href="#" class="submenu-item">
+                        <i class="ri-file-code-line"></i>
+                        <span>json</span>
+                    </a>
+                    <a href="#" class="submenu-item">
+                        <i class="ri-file-text-line"></i>
+                        <span>text</span>
+                    </a>
+                    <a href="#" class="submenu-item">
+                        <i class="ri-image-line"></i>
+                        <span>image</span>
+                    </a>
+                    <a href="#" class="submenu-item">
+                        <i class="ri-video-line"></i>
+                        <span>video</span>
+                    </a>
+                    <a href="#" class="submenu-item">
+                        <i class="ri-music-line"></i>
+                        <span>audio</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="nav-btn">
+                        <i class="ri-menu-line"></i>
+                    </button>
+                    <div class="header-title">
+                        <i class="ri-message-3-line"></i>
+                        <h1>Live Chat</h1>
+                    </div>
+                    <div class="header-user">
+                        <img src="https://ui-avatars.com/api/?name=User001&background=4285f4&color=fff" alt="User">
+                        <div class="header-user-info">
+                            <div class="header-user-name">User001</div>
+                            <div class="header-user-status">ออนไลน์ • กำลังพิมพ์...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="mode-toggle">
+                        <button class="mode-btn active">Manual</button>
+                        <button class="mode-btn">Bot</button>
+                    </div>
+                    <button class="nav-btn success">
+                        <i class="ri-user-add-line"></i>
+                        ออนไลน์
+                    </button>
+                    <div class="theme-selector">
+                        <button class="theme-btn" onclick="toggleThemeDropdown()">
+                            <i class="ri-palette-line"></i>
+                        </button>
+                        <div class="theme-dropdown" id="themeDropdown">
+                            <div class="theme-option active" onclick="setTheme('light')">
+                                <span class="theme-color" style="background-color: #ffffff; border: 1px solid #e0e0e0;"></span>
+                                <span>Light</span>
+                            </div>
+                            <div class="theme-option" onclick="setTheme('dark')">
+                                <span class="theme-color" style="background-color: #34495e;"></span>
+                                <span>Dark</span>
+                            </div>
+                            <div class="theme-option" onclick="setTheme('semi-dark')">
+                                <span class="theme-color" style="background-color: #2c3e50;"></span>
+                                <span>Semi-dark</span>
+                            </div>
+                            <div class="theme-option" onclick="setTheme('blue')">
+                                <span class="theme-color" style="background-color: #1976d2;"></span>
+                                <span>Blue</span>
+                            </div>
+                            <div class="theme-option" onclick="setTheme('green')">
+                                <span class="theme-color" style="background-color: #43a047;"></span>
+                                <span>Green</span>
+                            </div>
+                            <div class="theme-option" onclick="setTheme('purple')">
+                                <span class="theme-color" style="background-color: #8e24aa;"></span>
+                                <span>Purple</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-btn" onclick="toggleSettingsDropdown()">
+                        <i class="ri-settings-3-line"></i>
+                        <div class="settings-dropdown" id="settingsDropdown">
+                            <div class="settings-option" onclick="toggleSetting('notifications')">
+                                <span>Desktop Notifications</span>
+                                <div class="toggle-switch" id="notifications-toggle"></div>
+                            </div>
+                            <div class="settings-option" onclick="toggleSetting('sound')">
+                                <span>Sound Alerts</span>
+                                <div class="toggle-switch" id="sound-toggle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chat Area -->
+            <div class="chat-area" id="chatView">
+                <div class="messages-container">
+                    <div class="message bot">
+                        <img src="https://ui-avatars.com/api/?name=Bot&background=ea8600&color=fff" alt="Bot" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                สวัสดีค่ะ ยินดีต้อนรับสู่ LINE Agent Admin ระบบจัดการแชทบอทอัจฉริยะ
+                            </div>
+                            <div class="message-time">12:38</div>
+                        </div>
+                    </div>
+                    
+                    <div class="message user">
+                        <img src="https://ui-avatars.com/api/?name=User001&background=4285f4&color=fff" alt="User" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                สอบถามข้อมูลเกี่ยวกับระบบ
+                            </div>
+                            <div class="message-time">12:40</div>
+                        </div>
+                    </div>
+
+                    <div class="message bot">
+                        <img src="https://ui-avatars.com/api/?name=Bot&background=ea8600&color=fff" alt="Bot" class="message-avatar">
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                ระบบ LINE Agent Admin ประกอบด้วยฟีเจอร์หลักดังนี้:
+                                - FAQ: จัดการคำถามที่พบบ่อย
+                                - Message Templates: จัดการข้อความแม่แบบ
+                                - Dashboard: ดูภาพรวมการใช้งาน
+                                - Analytics: วิเคราะห์ข้อมูลเชิงลึก
+                                - Chat Histories: ดูประวัติการสนทนา
+                                - Live Chat: แชทแบบเรียลไทม์
+                                - File Manager: จัดการไฟล์ต่างๆ
+                            </div>
+                            <div class="message-time">12:41</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-container">
+                        <input type="text" placeholder="พิมพ์ข้อความ...">
+                        <div class="input-actions">
+                            <button class="input-action">
+                                <i class="ri-attachment-line"></i>
+                            </button>
+                            <button class="input-action">
+                                <i class="ri-emotion-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="send-btn">
+                        <i class="ri-send-plane-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme Management
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            // Update active state
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Close dropdown
+            document.getElementById('themeDropdown').classList.remove('show');
+        }
+
+        function toggleThemeDropdown() {
+            const dropdown = document.getElementById('themeDropdown');
+            dropdown.classList.toggle('show');
+            // Close settings dropdown if open
+            document.getElementById('settingsDropdown').classList.remove('show');
+        }
+
+        function toggleSettingsDropdown() {
+            const dropdown = document.getElementById('settingsDropdown');
+            dropdown.classList.toggle('show');
+            // Close theme dropdown if open
+            document.getElementById('themeDropdown').classList.remove('show');
+        }
+
+        // Settings Management
+        const settings = {
+            notifications: localStorage.getItem('notifications') === 'true',
+            sound: localStorage.getItem('sound') === 'true'
+        };
+
+        // Initialize toggles
+        if (settings.notifications) {
+            document.getElementById('notifications-toggle').classList.add('active');
+        }
+        if (settings.sound) {
+            document.getElementById('sound-toggle').classList.add('active');
+        }
+
+        function toggleSetting(setting) {
+            settings[setting] = !settings[setting];
+            localStorage.setItem(setting, settings[setting]);
+            
+            const toggle = document.getElementById(`${setting}-toggle`);
+            if (settings[setting]) {
+                toggle.classList.add('active');
+                
+                // Request notification permission if enabling notifications
+                if (setting === 'notifications' && 'Notification' in window) {
+                    Notification.requestPermission();
+                }
+            } else {
+                toggle.classList.remove('active');
+            }
+        }
+
+        // Click outside to close dropdowns
+        document.addEventListener('click', function(event) {
+            const themeSelector = document.querySelector('.theme-selector');
+            const settingsBtn = document.querySelector('.settings-btn');
+            
+            if (!themeSelector.contains(event.target)) {
+                document.getElementById('themeDropdown').classList.remove('show');
+            }
+            
+            if (!settingsBtn.contains(event.target)) {
+                document.getElementById('settingsDropdown').classList.remove('show');
+            }
+        });
+
+        // Submenu Toggle
+        function toggleSubmenu(menuItem, submenuId) {
+            const submenu = document.getElementById(submenuId);
+            const isExpanded = menuItem.classList.contains('expanded');
+            
+            // Close all submenus first
+            document.querySelectorAll('.submenu').forEach(s => s.classList.remove('show'));
+            document.querySelectorAll('.menu-item.has-submenu').forEach(m => m.classList.remove('expanded'));
+            
+            // Toggle current submenu
+            if (!isExpanded) {
+                menuItem.classList.add('expanded');
+                submenu.classList.add('show');
+            }
+        }
+
+        // Mode Toggle
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // User Selection
+        document.querySelectorAll('.user-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update header user info
+                const userName = this.querySelector('.user-name').textContent;
+                document.querySelector('.header-user-name').textContent = userName;
+                document.querySelector('.header-user img').src = this.querySelector('.user-avatar').src;
+            });
+        });
+
+        // Send Message
+        const inputField = document.querySelector('.input-container input');
+        const sendBtn = document.querySelector('.send-btn');
+
+        function sendMessage() {
+            const message = inputField.value.trim();
+            if (message) {
+                // Add message to chat
+                const messagesContainer = document.querySelector('.messages-container');
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message user';
+                messageElement.innerHTML = `
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=4285f4&color=fff" alt="Admin" class="message-avatar">
+                    <div class="message-content">
+                        <div class="message-bubble">${message}</div>
+                        <div class="message-time">${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
+                `;
+                messagesContainer.appendChild(messageElement);
+                
+                // Clear input
+                inputField.value = '';
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // Play sound if enabled
+                if (settings.sound) {
+                    // Play notification sound
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSl7y9+9diMFl2z');
+                    audio.play();
+                }
+                
+                // Show notification if enabled
+                if (settings.notifications && 'Notification' in window && Notification.permission === 'granted') {
+                    new Notification('New Message', {
+                        body: message,
+                        icon: 'https://ui-avatars.com/api/?name=Admin&background=4285f4&color=fff'
+                    });
+                }
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        inputField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Menu item clicks
+        document.querySelectorAll('.menu-item:not(.has-submenu)').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+/* Discord-style Dark Theme Update */
+/* เพิ่มลงในไฟล์ admin-chat-ui.html เพื่อแทนที่ธีม dark เดิม */
+
+[data-theme="dark"] {
+    /* Background Colors - ตามแบบ Discord */
+    --bg-primary: #36393f;      /* พื้นหลังหลัก (Chat area) */
+    --bg-secondary: #2f3136;    /* พื้นหลังรอง */
+    --bg-tertiary: #202225;     /* พื้นหลังเข้มสุด */
+    --bg-chat: #36393f;         /* พื้นที่แชท */
+    
+    /* Text Colors */
+    --text-primary: #dcddde;    /* ข้อความหลัก */
+    --text-secondary: #b9bbbe;  /* ข้อความรอง */
+    --text-tertiary: #96989d;   /* ข้อความอ่อน */
+    
+    /* Borders */
+    --border-color: #202225;    /* เส้นขอบ */
+    
+    /* Sidebar */
+    --sidebar-bg: #2f3136;      /* พื้นหลัง Sidebar */
+    --sidebar-text: #dcddde;    /* ข้อความใน Sidebar */
+    --sidebar-hover: #393c43;   /* Hover effect */
+    
+    /* Header/Navbar */
+    --header-bg: #2f3136;       /* พื้นหลัง Header */
+    
+    /* Message Bubbles - คงสีเดิมตามที่ขอ */
+    --message-user: #5865f2;    /* สีม่วง Discord สำหรับ user */
+    --message-bot: #e67e22;     /* สีส้มสำหรับ bot (คงเดิม) */
+    --message-user-text: #ffffff;
+    --message-bot-text: #ffffff;
+    
+    /* Input Area */
+    --input-bg: #40444b;        /* พื้นหลังช่องพิมพ์ */
+    
+    /* Shadows */
+    --shadow: rgba(4, 4, 5, 0.2);
+}
+
+/* เพิ่ม hover effects สำหรับธีม dark */
+[data-theme="dark"] .user-item:hover {
+    background-color: #393c43;
+}
+
+[data-theme="dark"] .user-item.active {
+    background-color: #393c43;
+}
+
+[data-theme="dark"] .menu-item:hover {
+    background-color: #393c43;
+}
+
+[data-theme="dark"] .menu-item.active {
+    background-color: #393c43;
+    border-left-color: #5865f2;
+}
+
+[data-theme="dark"] .mode-btn.active {
+    background-color: #5865f2;
+}
+
+[data-theme="dark"] .nav-btn.success {
+    background-color: #3ba55d;
+}
+
+[data-theme="dark"] input:focus {
+    border-color: #5865f2;
+}
+
+[data-theme="dark"] .search-box input {
+    background-color: #202225;
+    border-color: #202225;
+}
+
+[data-theme="dark"] .search-box input:focus {
+    border-color: #5865f2;
+}
+
+/* ปรับ scrollbar สำหรับธีม dark */
+[data-theme="dark"] ::-webkit-scrollbar {
+    width: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: #2e3338;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #202225;
+    border-radius: 4px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: #18191c;
+}

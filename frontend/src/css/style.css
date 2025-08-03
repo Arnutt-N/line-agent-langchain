@@ -16,6 +16,12 @@
   --text-secondary: #6b7280;
   --border: #e5e7eb;
   --shadow: rgba(0, 0, 0, 0.1);
+  
+  /* Message Colors */
+  --message-user: #2F66D0;
+  --message-bot: #F49D0E;
+  --message-admin: #10b981;
+  --message-system: #6b7280;
 }
 
 /* Dark Theme */
@@ -185,23 +191,23 @@
   }
   
   .message.user {
-    @apply ml-auto bg-blue-500 text-white;
+    @apply ml-auto text-white;
+    background-color: var(--message-user);
   }
   
   .message.admin {
-    @apply mr-auto bg-green-500 text-white;
+    @apply mr-auto text-white;
+    background-color: var(--message-admin);
   }
   
   .message.bot {
-    @apply mr-auto;
-    background-color: var(--surface);
-    color: var(--text-primary);
-    border: 1px solid var(--border);
+    @apply mr-auto text-white;
+    background-color: var(--message-bot);
   }
   
   .message.system {
     @apply mx-auto text-center text-sm;
-    color: var(--text-secondary);
+    color: var(--message-system);
   }
   
   /* Enhanced Buttons */
